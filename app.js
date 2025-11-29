@@ -376,183 +376,148 @@ function exportToPDF() {
   const grandTotal = tournamentTotal + operationsTotal;
   const perPlayer = grandTotal / rosterSize;
 
-  let htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>WGYS Budget - ${teamName}</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; margin: 0.5in; line-height: 1.6; color: #333; }
-        h1 { color: #208085; font-size: 24px; margin: 20px 0 10px 0; }
-        h2 { color: #208085; font-size: 16px; margin: 20px 0 10px 0; border-bottom: 2px solid #208085; padding-bottom: 6px; }
-        .header-info { margin-bottom: 20px; background: #f5f5f5; padding: 12px; border-radius: 4px; }
-        .info-row { margin: 6px 0; font-size: 12px; }
-        .summary-section { margin: 20px 0; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        th { background: #f0f0f0; padding: 10px; text-align: left; border: 1px solid #999; font-weight: bold; font-size: 12px; }
-        td { padding: 8px; border: 1px solid #ddd; font-size: 11px; }
-        tr:nth-child(even) { background: #fafafa; }
-        .total-row { font-weight: bold; background: #f0f0f0; }
-        .grand-total { font-weight: bold; font-size: 13px; background: #e8f4f5; }
-        @media print {
-            body { margin: 0.5in; }
-            .page-break { page-break-after: always; }
-        }
-    </style>
-</head>
-<body>
-    <h1>WGYS ${sport} - Budget &amp; Pricing Template</h1>
-    
-    <div class="header-info">
-        <div class="info-row"><strong>Team:</strong> ${teamName}</div>
-        <div class="info-row"><strong>Season:</strong> ${season}</div>
-        <div class="info-row"><strong>Roster Size:</strong> ${rosterSize} Players</div>
-    </div>
+  // Access jsPDF from window.jspdf
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'letter');
 
-    <h2>Tournament Costs</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Tournament Name</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Entry Fee</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${tournaments.map(t => `
-            <tr>
-                <td>${t.name}</td>
-                <td>${t.start}</td>
-                <td>${t.end}</td>
-                <td>${formatCurrency(t.fee)}</td>
-            </tr>
-            `).join('')}
-            <tr class="total-row">
-                <td colspan="3">Total Tournament Costs</td>
-                <td>${formatCurrency(tournamentTotal)}</td>
-            </tr>
-        </tbody>
-    </table>
+  let yPosition = 15;
+  const margin = 10;
 
-    <h2>Equipment</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Cost</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${equipment.map(e => `
-            <tr>
-                <td>${e.item}</td>
-                <td>${formatCurrency(e.cost)}</td>
-            </tr>
-            `).join('')}
-            <tr class="total-row">
-                <td>Total Equipment Costs</td>
-                <td>${formatCurrency(equipmentTotal)}</td>
-            </tr>
-        </tbody>
-    </table>
+  // Title
+  doc.setFontSize(18);
+  doc.setTextColor(32, 128, 133);
+  doc.text(`WGYS ${sport} - Budget & Pricing Template`, margin, yPosition);
+  yPosition += 12;
 
-    <h2>Insurance &amp; Memberships</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Cost</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${insurance.map(i => `
-            <tr>
-                <td>${i.item}</td>
-                <td>${formatCurrency(i.cost)}</td>
-            </tr>
-            `).join('')}
-            <tr class="total-row">
-                <td>Total Insurance Costs</td>
-                <td>${formatCurrency(insuranceTotal)}</td>
-            </tr>
-        </tbody>
-    </table>
+  // Team Info
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Team: ${teamName}`, margin, yPosition);
+  yPosition += 6;
+  doc.text(`Season: ${season}`, margin, yPosition);
+  yPosition += 6;
+  doc.text(`Roster Size: ${rosterSize} Players`, margin, yPosition);
+  yPosition += 12;
 
-    <h2>Training</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Cost</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${training.map(t => `
-            <tr>
-                <td>${t.item}</td>
-                <td>${formatCurrency(t.cost)}</td>
-            </tr>
-            `).join('')}
-            <tr class="total-row">
-                <td>Total Training Costs</td>
-                <td>${formatCurrency(trainingTotal)}</td>
-            </tr>
-        </tbody>
-    </table>
+  // Tournament Costs Section
+  doc.setFontSize(12);
+  doc.setTextColor(32, 128, 133);
+  doc.text('Tournament Costs', margin, yPosition);
+  yPosition += 8;
 
-    <div class="page-break"></div>
+  const tournamentData = tournaments.map(t => [t.name, t.start, t.end, formatCurrency(t.fee)]);
+  tournamentData.push(['Total Tournament Costs', '', '', formatCurrency(tournamentTotal)]);
 
-    <h2>Budget Summary</h2>
-    <div class="summary-section">
-        <table>
-            <tr>
-                <td><strong>Tournament Costs:</strong></td>
-                <td>${formatCurrency(tournamentTotal)}</td>
-            </tr>
-            <tr>
-                <td><strong>Equipment Costs:</strong></td>
-                <td>${formatCurrency(equipmentTotal)}</td>
-            </tr>
-            <tr>
-                <td><strong>Insurance &amp; Memberships:</strong></td>
-                <td>${formatCurrency(insuranceTotal)}</td>
-            </tr>
-            <tr>
-                <td><strong>Training Costs:</strong></td>
-                <td>${formatCurrency(trainingTotal)}</td>
-            </tr>
-            <tr>
-                <td><strong>Operations Total:</strong></td>
-                <td>${formatCurrency(operationsTotal)}</td>
-            </tr>
-            <tr class="grand-total">
-                <td><strong>GRAND TOTAL:</strong></td>
-                <td><strong>${formatCurrency(grandTotal)}</strong></td>
-            </tr>
-            <tr>
-                <td><strong>Cost Per Player:</strong></td>
-                <td><strong>${formatCurrency(perPlayer)}</strong></td>
-            </tr>
-        </table>
-    </div>
-</body>
-</html>`;
+  doc.autoTable({
+    startY: yPosition,
+    head: [['Tournament Name', 'Start Date', 'End Date', 'Entry Fee']],
+    body: tournamentData,
+    margin: margin,
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [255, 255, 255] }
+  });
 
-  // Open in new window for printing to PDF
-  const printWindow = window.open('', '', 'height=800,width=1000');
-  printWindow.document.write(htmlContent);
-  printWindow.document.close();
+  yPosition = doc.lastAutoTable.finalY + 8;
 
-  // Delay to ensure content loads before printing
-  setTimeout(() => {
-    printWindow.print();
-    // Close window after a delay
-    setTimeout(() => {
-      printWindow.close();
-    }, 1000);
-  }, 500);
+  // Equipment Section
+  doc.setFontSize(12);
+  doc.setTextColor(32, 128, 133);
+  doc.text('Equipment', margin, yPosition);
+  yPosition += 8;
+
+  const equipmentData = equipment.map(e => [e.item, formatCurrency(e.cost)]);
+  equipmentData.push(['Total Equipment Costs', formatCurrency(equipmentTotal)]);
+
+  doc.autoTable({
+    startY: yPosition,
+    head: [['Item', 'Cost']],
+    body: equipmentData,
+    margin: margin,
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [255, 255, 255] }
+  });
+
+  yPosition = doc.lastAutoTable.finalY + 8;
+
+  // Insurance Section
+  doc.setFontSize(12);
+  doc.setTextColor(32, 128, 133);
+  doc.text('Insurance & Memberships', margin, yPosition);
+  yPosition += 8;
+
+  const insuranceData = insurance.map(i => [i.item, formatCurrency(i.cost)]);
+  insuranceData.push(['Total Insurance Costs', formatCurrency(insuranceTotal)]);
+
+  doc.autoTable({
+    startY: yPosition,
+    head: [['Item', 'Cost']],
+    body: insuranceData,
+    margin: margin,
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [255, 255, 255] }
+  });
+
+  yPosition = doc.lastAutoTable.finalY + 8;
+
+  // Training Section
+  doc.setFontSize(12);
+  doc.setTextColor(32, 128, 133);
+  doc.text('Training', margin, yPosition);
+  yPosition += 8;
+
+  const trainingData = training.map(t => [t.item, formatCurrency(t.cost)]);
+  trainingData.push(['Total Training Costs', formatCurrency(trainingTotal)]);
+
+  doc.autoTable({
+    startY: yPosition,
+    head: [['Item', 'Cost']],
+    body: trainingData,
+    margin: margin,
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [255, 255, 255] }
+  });
+
+  yPosition = doc.lastAutoTable.finalY + 12;
+
+  // Check if we need a new page
+  if (yPosition > 250) {
+    doc.addPage();
+    yPosition = 15;
+  }
+
+  // Budget Summary Section
+  doc.setFontSize(12);
+  doc.setTextColor(32, 128, 133);
+  doc.text('Budget Summary', margin, yPosition);
+  yPosition += 8;
+
+  const summaryData = [
+    ['Tournament Costs:', formatCurrency(tournamentTotal)],
+    ['Equipment Costs:', formatCurrency(equipmentTotal)],
+    ['Insurance & Memberships:', formatCurrency(insuranceTotal)],
+    ['Training Costs:', formatCurrency(trainingTotal)],
+    ['Operations Total:', formatCurrency(operationsTotal)],
+    ['GRAND TOTAL:', formatCurrency(grandTotal)],
+    ['Cost Per Player:', formatCurrency(perPlayer)]
+  ];
+
+  doc.autoTable({
+    startY: yPosition,
+    head: [['Category', 'Amount']],
+    body: summaryData,
+    margin: margin,
+    styles: { fontSize: 10, cellPadding: 3 },
+    headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
+    bodyStyles: { fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [255, 255, 255] }
+  });
+
+  // Save the PDF
+  doc.save(`WGYS_Budget_${teamName}_${season}.pdf`);
 }
 
 function exportToDOCX() {
