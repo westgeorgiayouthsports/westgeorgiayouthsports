@@ -1,3 +1,69 @@
+let TEAM_BUDGETS_DATA = {
+  "teams": [
+    {
+      "id": "wgys-velocity-13u-2023",
+      "name": "WGYS Velocity 13U Select",
+      "sport": "Baseball",
+      "season": 2023,
+      "rosterSize": 12,
+      "tournaments": [
+        { "name": "17BB: Beat the Freeze", "start": "2023-02-25", "end": "2023-02-26", "fee": 450 },
+        { "name": "PBR: Sunday Series #3", "start": "2023-03-05", "end": "2023-03-05", "fee": 425 },
+        { "name": "PG: For the Kids Classic (MINOR)", "start": "2023-03-17", "end": "2023-03-19", "fee": 725 },
+        { "name": "17BB: March Madness", "start": "2023-03-25", "end": "2023-03-26", "fee": 550 },
+        { "name": "PG: Southeast Backyard Brawl (MAJOR)", "start": "2023-04-14", "end": "2023-04-16", "fee": 725 },
+        { "name": "PG: Georgia State Championship (MAJOR)", "start": "2023-04-21", "end": "2023-04-23", "fee": 750 },
+        { "name": "PG: Southeast Youth World Series (Open)", "start": "2023-05-05", "end": "2023-05-07", "fee": 725 },
+        { "name": "PG: Georgia State Championship (MINOR)", "start": "2023-05-12", "end": "2023-05-14", "fee": 725 },
+        { "name": "PG: Greater Atlanta Open", "start": "2023-05-19", "end": "2023-05-21", "fee": 725 },
+        { "name": "PG: Youth Southeast Memorial Day Classic (Open)", "start": "2023-05-26", "end": "2023-05-29", "fee": 725 },
+        { "name": "PG: Southeast Elite Youth Championship (OPEN)", "start": "2023-06-02", "end": "2023-06-04", "fee": 725 },
+        { "name": "PG: Southeast World Series #2 (MINOR)", "start": "2023-06-09", "end": "2023-06-11", "fee": 725 }
+      ],
+      "uniforms": [
+        { "item": "Jersey", "cost": 50 },
+        { "item": "Pants", "cost": 50 },
+        { "item": "Hat", "cost": 14 },
+        { "item": "Belt", "cost": 5 },
+        { "item": "Socks", "cost": 5 }
+      ],
+      "equipment": [
+        { "item": "Practice & Game Baseballs", "cost": 500 },
+        { "item": "Practice Jerseys (2) & Hats (screen print & embroidered logos/numbers)", "cost": 900 }
+      ],
+      "insurance": [
+        { "item": "Team Insurance", "cost": 140 },
+        { "item": "TeamSnap Annual Subscription", "cost": 100 }
+      ],
+      "training": [
+        { "item": "Training Facility, HitTrax Cage, & Pitching Machine", "cost": 1500 },
+        { "item": "Speed & Agility Trainer (Feb-Jun)", "cost": 1000 }
+      ]
+    },
+    {
+      "id": "wgys-select-softball-14u-2026",
+      "name": "WGYS Select Softball 14U",
+      "sport": "Softball",
+      "season": 2024,
+      "rosterSize": 14,
+      "tournaments": [],
+      "equipment": [],
+      "insurance": [],
+      "training": []
+    }
+  ]
+};
+
+// Load team data from localStorage if available
+const savedTeamData = localStorage.getItem('TEAM_BUDGETS_DATA');
+if (savedTeamData) {
+  try {
+    TEAM_BUDGETS_DATA = JSON.parse(savedTeamData);
+  } catch (e) {
+    console.error('Failed to load saved team data:', e);
+  }
+}
+
 const DEFAULT_TOURNAMENTS = [
   { name: "17BB: Beat the Freeze", start: "2023-02-25", end: "2023-02-26", fee: 450 },
   { name: "PBR: Sunday Series #3", start: "2023-03-05", end: "2023-03-05", fee: 425 },
@@ -15,8 +81,7 @@ const DEFAULT_TOURNAMENTS = [
 
 const DEFAULT_EQUIPMENT = [
   { item: "Practice & Game Baseballs", cost: 500 },
-  { item: "Practice Jerseys (2) & Hats (screen print & embroidered logos/numbers)", cost: 900 },
-  { item: "Game Uniforms", cost: 4000 }
+  { item: "Practice Jerseys (2) & Hats (screen print & embroidered logos/numbers)", cost: 900 }
 ];
 
 const DEFAULT_INSURANCE = [
@@ -29,10 +94,12 @@ const DEFAULT_TRAINING = [
   { item: "Speed & Agility Trainer (Feb-Jun)", cost: 1000 }
 ];
 
-let tournaments = [...DEFAULT_TOURNAMENTS];
-let equipment = [...DEFAULT_EQUIPMENT];
-let insurance = [...DEFAULT_INSURANCE];
-let training = [...DEFAULT_TRAINING];
+let tournaments = [];
+let equipment = [];
+let uniforms = [];
+let insurance = [];
+let training = [];
+let currentlyLoadedTeamId = null;
 
 function getTodayDate() {
   const today = new Date();
@@ -62,6 +129,10 @@ function initializeApp() {
   document.getElementById('addEquipmentBtn').addEventListener('click', addEquipmentItem);
   document.getElementById('clearEquipmentBtn').addEventListener('click', clearEquipment);
 
+  // Uniform Event Listeners
+  document.getElementById('addUniformBtn').addEventListener('click', addUniformItem);
+  document.getElementById('clearUniformsBtn').addEventListener('click', clearUniforms);
+
   // Insurance Event Listeners
   document.getElementById('addInsuranceBtn').addEventListener('click', addInsuranceItem);
   document.getElementById('clearInsuranceBtn').addEventListener('click', clearInsurance);
@@ -83,14 +154,74 @@ function initializeApp() {
   document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
   document.getElementById('exportDocxBtn').addEventListener('click', exportToDOCX);
 
+  // Save Teams Listener
+  if (document.getElementById('saveTeamsBtn')) {
+    document.getElementById('saveTeamsBtn').addEventListener('click', function () {
+      saveCurrentTeam();
+      saveTeamsToFile();
+    });
+  }
+
+  // Team Loader Listener
+  if (document.getElementById('teamLoader')) {
+    document.getElementById('teamLoader').addEventListener('change', function () {
+      if (this.value) {
+        saveCurrentTeam();
+        loadTeamData(this.value);
+      }
+    });
+    populateTeamLoader();
+  }
+
+  // New Team Listener
+  if (document.getElementById('newTeamBtn')) {
+    document.getElementById('newTeamBtn').addEventListener('click', createNewTeam);
+  }
+
+  // Delete Team Listener
+  if (document.getElementById('deleteTeamBtn')) {
+    document.getElementById('deleteTeamBtn').addEventListener('click', deleteTeam);
+  }
+
   // Roster Change Listener
   document.getElementById('roster').addEventListener('change', updateAll);
+
+  // Team Name Change Listener - update the team data when name is edited
+  document.getElementById('teamName').addEventListener('change', function () {
+    if (currentlyLoadedTeamId) {
+      const team = TEAM_BUDGETS_DATA.teams.find(t => t.id === currentlyLoadedTeamId);
+      if (team) {
+        team.name = this.value;
+        localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+        populateTeamLoader();
+        // Keep the team selected in the dropdown after updating the list
+        document.getElementById('teamLoader').value = currentlyLoadedTeamId;
+      }
+    }
+  });
 
   // Load saved theme
   const savedTheme = localStorage.getItem('theme') || 'dark';
   setTheme(savedTheme);
 
   renderAll();
+
+  // Load first team by default if any teams exist
+  if (TEAM_BUDGETS_DATA.teams.length > 0) {
+    const firstTeam = TEAM_BUDGETS_DATA.teams[0];
+    loadTeamData(firstTeam.id);
+    document.getElementById('teamLoader').value = firstTeam.id;
+  } else {
+    // Sync the dropdown with the currently loaded team (if any)
+    const teamName = document.getElementById('teamName').value;
+    if (teamName && TEAM_BUDGETS_DATA.teams.length > 0) {
+      const matchingTeam = TEAM_BUDGETS_DATA.teams.find(t => t.name === teamName);
+      if (matchingTeam) {
+        currentlyLoadedTeamId = matchingTeam.id;
+        document.getElementById('teamLoader').value = matchingTeam.id;
+      }
+    }
+  }
 }
 
 function setTheme(theme) {
@@ -113,10 +244,205 @@ function formatCurrency(val) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 }
 
+function populateTeamLoader() {
+  const loaderSelect = document.getElementById('teamLoader');
+  if (!loaderSelect) return;
+
+  // Clear existing options except the first placeholder
+  loaderSelect.innerHTML = '<option value="">-- Select a Team to Load --</option>';
+
+  // Add teams from TEAM_BUDGETS_DATA
+  if (TEAM_BUDGETS_DATA && TEAM_BUDGETS_DATA.teams) {
+    TEAM_BUDGETS_DATA.teams.forEach(team => {
+      const option = document.createElement('option');
+      option.value = team.id;
+      option.textContent = `${team.name} (${team.sport}, ${team.season})`;
+      loaderSelect.appendChild(option);
+    });
+  }
+}
+
+function saveCurrentTeam() {
+  // Get the team name to find the currently loaded team
+  const teamName = document.getElementById('teamName').value;
+  const currentTeam = TEAM_BUDGETS_DATA.teams.find(t => t.name === teamName);
+
+  if (currentTeam) {
+    // Save all current form data to the team object
+    currentTeam.name = document.getElementById('teamName').value;
+    currentTeam.sport = document.getElementById('sport').value;
+    currentTeam.season = parseInt(document.getElementById('season').value);
+    currentTeam.rosterSize = parseInt(document.getElementById('roster').value);
+    currentTeam.tournaments = JSON.parse(JSON.stringify(tournaments));
+    currentTeam.equipment = JSON.parse(JSON.stringify(equipment));
+    currentTeam.uniforms = JSON.parse(JSON.stringify(uniforms));
+    currentTeam.insurance = JSON.parse(JSON.stringify(insurance));
+    currentTeam.training = JSON.parse(JSON.stringify(training));
+  }
+}
+
+function loadTeamData(teamId) {
+  if (!teamId) return;
+
+  // Find the team in TEAM_BUDGETS_DATA
+  const team = TEAM_BUDGETS_DATA.teams.find(t => t.id === teamId);
+  if (!team) return;
+
+  // Load form fields
+  document.getElementById('teamName').value = team.name || '';
+  document.getElementById('sport').value = team.sport || 'Baseball';
+  document.getElementById('season').value = team.season || new Date().getFullYear();
+  document.getElementById('roster').value = team.rosterSize || 12;
+
+  // Load tournaments
+  tournaments = JSON.parse(JSON.stringify(team.tournaments || []));
+  renderTournaments();
+
+  // Load equipment
+  equipment = JSON.parse(JSON.stringify(team.equipment || []));
+  renderEquipment();
+
+  // Load uniforms
+  uniforms = JSON.parse(JSON.stringify(team.uniforms || []));
+  renderUniforms();
+
+  // Load insurance
+  insurance = JSON.parse(JSON.stringify(team.insurance || []));
+  renderInsurance();
+
+  // Load training
+  training = JSON.parse(JSON.stringify(team.training || []));
+  renderTraining();
+
+  // Update all calculations
+  updateAll();
+
+  // Keep the dropdown selected and track the currently loaded team
+  currentlyLoadedTeamId = teamId;
+}
+
+function deleteTeam() {
+  const loaderSelect = document.getElementById('teamLoader');
+  const selectedTeamId = currentlyLoadedTeamId || loaderSelect.value;
+
+  if (!selectedTeamId) {
+    alert('Please select a team to delete.');
+    return;
+  }
+
+  const teamToDelete = TEAM_BUDGETS_DATA.teams.find(t => t.id === selectedTeamId);
+  if (!teamToDelete) return;
+
+  if (confirm(`Are you sure you want to delete "${teamToDelete.name}"? This cannot be undone.`)) {
+    // Remove the team from the array
+    TEAM_BUDGETS_DATA.teams = TEAM_BUDGETS_DATA.teams.filter(t => t.id !== selectedTeamId);
+
+    // Save to localStorage
+    localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+
+    // Clear the currently loaded team
+    currentlyLoadedTeamId = null;
+
+    // Refresh the team loader dropdown
+    populateTeamLoader();
+
+    // Clear the form
+    document.getElementById('teamName').value = '';
+    document.getElementById('sport').value = 'Baseball';
+    document.getElementById('season').value = new Date().getFullYear();
+    document.getElementById('roster').value = 12;
+    tournaments = [];
+    equipment = [];
+    uniforms = [];
+    insurance = [];
+    training = [];
+    renderAll();
+
+    // Save to file
+    saveTeamsToFile();
+  }
+}
+
+function saveTeamsToFile() {
+  // Save to localStorage to persist team data
+  localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+
+  // Also offer to download as JSON file for backup/manual saving to repo
+  const jsonData = JSON.stringify(TEAM_BUDGETS_DATA, null, 2);
+  const blob = new Blob([jsonData], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'team-budgets.json';
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  alert('Team data saved locally. JSON file downloaded for backup.');
+}
+
+function createNewTeam() {
+  const teamName = prompt('Enter new team name:');
+  if (!teamName) return;
+
+  // Clear all form fields
+  document.getElementById('teamName').value = teamName;
+  document.getElementById('sport').value = 'Baseball';
+  document.getElementById('season').value = new Date().getFullYear();
+  document.getElementById('roster').value = 12;
+
+  // Clear all data arrays
+  tournaments = [];
+  equipment = [];
+  uniforms = [];
+  insurance = [];
+  training = [];
+
+  // Create new team object and add to TEAM_BUDGETS_DATA
+  const teamId = 'wgys-' + teamName.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+  const newTeam = {
+    id: teamId,
+    name: teamName,
+    sport: 'Baseball',
+    season: new Date().getFullYear(),
+    rosterSize: 12,
+    tournaments: [],
+    equipment: [],
+    uniforms: [],
+    insurance: [],
+    training: []
+  };
+  TEAM_BUDGETS_DATA.teams.push(newTeam);
+
+  // Set as currently loaded team
+  currentlyLoadedTeamId = teamId;
+
+  // Refresh the team loader dropdown
+  populateTeamLoader();
+
+  // Keep the new team selected in the dropdown
+  const loaderSelect = document.getElementById('teamLoader');
+  if (loaderSelect) {
+    loaderSelect.value = teamId;
+  }
+
+  // Render all sections
+  renderAll();
+
+  // Save to localStorage
+  localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+
+  // Save to file
+  saveTeamsToFile();
+}
+
 function renderTournaments() {
   const body = document.getElementById('tournamentsBody');
   body.innerHTML = tournaments.map((t, i) => `
         <tr>
+            <td>${i + 1}.</td>
             <td><input type="text" value="${t.name}" onchange="tournaments[${i}].name = this.value; updateAll();"></td>
             <td><input type="date" value="${t.start}" onchange="tournaments[${i}].start = this.value; updateAll();" onblur="if(!tournaments[${i}].end && tournaments[${i}].start) { tournaments[${i}].end = tournaments[${i}].start; renderTournaments(); }"></td>
             <td><input type="date" value="${t.end}" onchange="tournaments[${i}].end = this.value; updateAll();"></td>
@@ -136,6 +462,23 @@ function renderEquipment() {
             <td><button class="btn btn-secondary btn-sm" onclick="removeEquipmentItem(${i})">Remove</button></td>
         </tr>
     `).join('');
+  updateAll();
+}
+
+function renderUniforms() {
+  const rosterSize = parseFloat(document.getElementById('roster').value) || 1;
+  const body = document.getElementById('uniformsBody');
+  body.innerHTML = uniforms.map((u, i) => {
+    const totalCost = (parseFloat(u.cost) || 0) * rosterSize;
+    return `
+        <tr>
+            <td><input type="text" value="${u.item}" onchange="uniforms[${i}].item = this.value; updateAll();"></td>
+            <td><input type="number" value="${u.cost}" min="0" step="0.01" onchange="uniforms[${i}].cost = parseFloat(this.value) || 0; updateAll();"></td>
+            <td>${formatCurrency(totalCost)}</td>
+            <td><button class="btn btn-secondary btn-sm" onclick="removeUniformItem(${i})">Remove</button></td>
+        </tr>
+    `;
+  }).join('');
   updateAll();
 }
 
@@ -164,13 +507,15 @@ function renderTraining() {
 }
 
 function updateAll() {
+  const rosterSize = parseFloat(document.getElementById('roster').value) || 1;
   const tournamentTotal = tournaments.reduce((sum, t) => sum + (parseFloat(t.fee) || 0), 0);
   const equipmentTotal = equipment.reduce((sum, e) => sum + (parseFloat(e.cost) || 0), 0);
+  const uniformsPerPlayerTotal = uniforms.reduce((sum, u) => sum + (parseFloat(u.cost) || 0), 0);
+  const uniformsTotal = uniformsPerPlayerTotal * rosterSize;
   const insuranceTotal = insurance.reduce((sum, i) => sum + (parseFloat(i.cost) || 0), 0);
   const trainingTotal = training.reduce((sum, t) => sum + (parseFloat(t.cost) || 0), 0);
-  const operationsTotal = equipmentTotal + insuranceTotal + trainingTotal;
+  const operationsTotal = equipmentTotal + uniformsTotal + insuranceTotal + trainingTotal;
   const grandTotal = tournamentTotal + operationsTotal;
-  const rosterSize = parseFloat(document.getElementById('roster').value) || 1;
   const perPlayer = grandTotal / rosterSize;
 
   // Calculate percentages
@@ -181,6 +526,9 @@ function updateAll() {
   document.getElementById('tournamentCount').textContent = tournaments.length;
   document.getElementById('tournamentTotal').textContent = formatCurrency(tournamentTotal);
   document.getElementById('equipmentTotal').textContent = formatCurrency(equipmentTotal);
+  document.getElementById('uniformsPerPlayer').textContent = formatCurrency(uniformsPerPlayerTotal);
+  document.getElementById('rosterCount').textContent = rosterSize;
+  document.getElementById('uniformsTotal').textContent = formatCurrency(uniformsTotal);
   document.getElementById('insuranceTotal').textContent = formatCurrency(insuranceTotal);
   document.getElementById('trainingTotal').textContent = formatCurrency(trainingTotal);
 
@@ -195,6 +543,7 @@ function updateAll() {
   // Update line item view
   document.getElementById('lineItemTournaments').textContent = formatCurrency(tournamentTotal);
   document.getElementById('lineItemEquipment').textContent = formatCurrency(equipmentTotal);
+  document.getElementById('lineItemUniforms').textContent = formatCurrency(uniformsTotal);
   document.getElementById('lineItemInsurance').textContent = formatCurrency(insuranceTotal);
   document.getElementById('lineItemTraining').textContent = formatCurrency(trainingTotal);
   document.getElementById('lineItemGrandTotal').textContent = formatCurrency(grandTotal);
@@ -204,6 +553,7 @@ function updateAll() {
 function renderAll() {
   renderTournaments();
   renderEquipment();
+  renderUniforms();
   renderInsurance();
   renderTraining();
 }
@@ -242,6 +592,24 @@ function clearEquipment() {
   if (confirm("Clear all equipment items? This cannot be undone.")) {
     equipment = [];
     renderEquipment();
+  }
+}
+
+// Uniform Functions
+function addUniformItem() {
+  uniforms.push({ item: "", cost: 0 });
+  renderUniforms();
+}
+
+function removeUniformItem(idx) {
+  uniforms.splice(idx, 1);
+  renderUniforms();
+}
+
+function clearUniforms() {
+  if (confirm("Clear all uniform items? This cannot be undone.")) {
+    uniforms = [];
+    renderUniforms();
   }
 }
 

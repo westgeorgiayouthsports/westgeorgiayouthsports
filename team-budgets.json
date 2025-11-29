@@ -1,0 +1,49 @@
+{
+  "teams": [
+    {
+      "id": "wgys-velocity-13u-2023",
+      "name": "WGYS Velocity 13U Select",
+      "sport": "Baseball",
+      "season": 2023,
+      "rosterSize": 12,
+      "tournaments": [
+        { "name": "17BB: Beat the Freeze", "start": "2023-02-25", "end": "2023-02-26", "fee": 450 },
+        { "name": "PBR: Sunday Series #3", "start": "2023-03-05", "end": "2023-03-05", "fee": 425 },
+        { "name": "PG: For the Kids Classic (MINOR)", "start": "2023-03-17", "end": "2023-03-19", "fee": 725 },
+        { "name": "17BB: March Madness", "start": "2023-03-25", "end": "2023-03-26", "fee": 550 },
+        { "name": "PG: Southeast Backyard Brawl (MAJOR)", "start": "2023-04-14", "end": "2023-04-16", "fee": 725 },
+        { "name": "PG: Georgia State Championship (MAJOR)", "start": "2023-04-21", "end": "2023-04-23", "fee": 750 },
+        { "name": "PG: Southeast Youth World Series (Open)", "start": "2023-05-05", "end": "2023-05-07", "fee": 725 },
+        { "name": "PG: Georgia State Championship (MINOR)", "start": "2023-05-12", "end": "2023-05-14", "fee": 725 },
+        { "name": "PG: Greater Atlanta Open", "start": "2023-05-19", "end": "2023-05-21", "fee": 725 },
+        { "name": "PG: Youth Southeast Memorial Day Classic (Open)", "start": "2023-05-26", "end": "2023-05-29", "fee": 725 },
+        { "name": "PG: Southeast Elite Youth Championship (OPEN)", "start": "2023-06-02", "end": "2023-06-04", "fee": 725 },
+        { "name": "PG: Southeast World Series #2 (MINOR)", "start": "2023-06-09", "end": "2023-06-11", "fee": 725 }
+      ],
+      "equipment": [
+        { "item": "Practice & Game Baseballs", "cost": 500 },
+        { "item": "Practice Jerseys (2) & Hats (screen print & embroidered logos/numbers)", "cost": 900 },
+        { "item": "Game Uniforms", "cost": 4000 }
+      ],
+      "insurance": [
+        { "item": "Team Insurance", "cost": 140 },
+        { "item": "TeamSnap Annual Subscription", "cost": 100 }
+      ],
+      "training": [
+        { "item": "Training Facility, HitTrax Cage, & Pitching Machine", "cost": 1500 },
+        { "item": "Speed & Agility Trainer (Feb-Jun)", "cost": 1000 }
+      ]
+    },
+    {
+      "id": "wgys-select-softball-14u-2026",
+      "name": "WGYS Select Softball 14U",
+      "sport": "Softball",
+      "season": 2026,
+      "rosterSize": 14,
+      "tournaments": [ ],
+      "equipment": [ ],
+      "insurance": [ ],
+      "training": [ ]
+    }    
+  ]
+}
