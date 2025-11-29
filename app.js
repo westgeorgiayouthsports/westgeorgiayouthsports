@@ -678,10 +678,13 @@ function exportToExcel() {
 
   const tournamentTotal = tournaments.reduce((sum, t) => sum + (parseFloat(t.fee) || 0), 0);
   const equipmentTotal = equipment.reduce((sum, e) => sum + (parseFloat(e.cost) || 0), 0);
+  const uniformsPerPlayerTotal = uniforms.reduce((sum, u) => sum + (parseFloat(u.cost) || 0), 0);
+  const uniformsTotal = uniformsPerPlayerTotal * (parseFloat(rosterSize) || 1);
   const insuranceTotal = insurance.reduce((sum, i) => sum + (parseFloat(i.cost) || 0), 0);
   const trainingTotal = training.reduce((sum, t) => sum + (parseFloat(t.cost) || 0), 0);
-  const grandTotal = tournamentTotal + equipmentTotal + insuranceTotal + trainingTotal;
-  const perPlayer = grandTotal / rosterSize;
+  const operationsTotal = equipmentTotal + uniformsTotal + insuranceTotal + trainingTotal;
+  const grandTotal = tournamentTotal + operationsTotal;
+  const perPlayer = grandTotal / (parseFloat(rosterSize) || 1);
 
   let csvContent = `WGYS ${sport} - Budget & Pricing Template\n`;
   csvContent += `Team: ${teamName}\nSeason: ${season}\nRoster Size: ${rosterSize}\n\n`;
@@ -691,6 +694,13 @@ function exportToExcel() {
     csvContent += `"${t.name}",${t.start},${t.end},${t.fee}\n`;
   });
   csvContent += `Total Tournament Costs,,,${tournamentTotal}\n\n`;
+
+  csvContent += `UNIFORMS\nItem,Cost Per Player,Total Cost\n`;
+  uniforms.forEach(u => {
+    const total = (parseFloat(u.cost) || 0) * (parseFloat(rosterSize) || 1);
+    csvContent += `"${u.item}",${u.cost},${total}\n`;
+  });
+  csvContent += `Total Uniform Costs,,${uniformsTotal}\n\n`;
 
   csvContent += `EQUIPMENT\nItem,Cost\n`;
   equipment.forEach(e => {
@@ -713,6 +723,7 @@ function exportToExcel() {
   csvContent += `SUMMARY\nCategory,Amount\n`;
   csvContent += `Tournament Costs,${tournamentTotal}\n`;
   csvContent += `Equipment Costs,${equipmentTotal}\n`;
+  csvContent += `Uniform Costs,${uniformsTotal}\n`;
   csvContent += `Insurance & Memberships,${insuranceTotal}\n`;
   csvContent += `Training Costs,${trainingTotal}\n`;
   csvContent += `Grand Total,${grandTotal}\n`;
@@ -737,12 +748,14 @@ function exportToPDF() {
   const rosterSize = document.getElementById('roster').value;
 
   const tournamentTotal = tournaments.reduce((sum, t) => sum + (parseFloat(t.fee) || 0), 0);
+  const uniformsPerPlayerTotal = uniforms.reduce((sum, u) => sum + (parseFloat(u.cost) || 0), 0);
+  const uniformsTotal = uniformsPerPlayerTotal * (parseFloat(rosterSize) || 1);
   const equipmentTotal = equipment.reduce((sum, e) => sum + (parseFloat(e.cost) || 0), 0);
   const insuranceTotal = insurance.reduce((sum, i) => sum + (parseFloat(i.cost) || 0), 0);
   const trainingTotal = training.reduce((sum, t) => sum + (parseFloat(t.cost) || 0), 0);
-  const operationsTotal = equipmentTotal + insuranceTotal + trainingTotal;
+  const operationsTotal = equipmentTotal + uniformsTotal + insuranceTotal + trainingTotal;
   const grandTotal = tournamentTotal + operationsTotal;
-  const perPlayer = grandTotal / rosterSize;
+  const perPlayer = grandTotal / (parseFloat(rosterSize) || 1);
 
   // Access jsPDF from window.jspdf
   const { jsPDF } = window.jspdf;
@@ -780,6 +793,27 @@ function exportToPDF() {
     startY: yPosition,
     head: [['Tournament Name', 'Start Date', 'End Date', 'Entry Fee']],
     body: tournamentData,
+    margin: margin,
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [255, 255, 255] }
+  });
+
+  yPosition = doc.lastAutoTable.finalY + 8;
+
+  // Uniforms Section
+  doc.setFontSize(12);
+  doc.setTextColor(32, 128, 133);
+  doc.text('Uniforms', margin, yPosition);
+  yPosition += 8;
+
+  const uniformsData = uniforms.map(u => [u.item, formatCurrency(u.cost), formatCurrency((parseFloat(u.cost) || 0) * (parseFloat(rosterSize) || 1))]);
+  uniformsData.push(['Total Uniform Costs', '', formatCurrency(uniformsTotal)]);
+
+  doc.autoTable({
+    startY: yPosition,
+    head: [['Item', 'Cost Per Player', 'Total Cost']],
+    body: uniformsData,
     margin: margin,
     styles: { fontSize: 9, cellPadding: 3 },
     headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
@@ -895,12 +929,14 @@ function exportToDOCX() {
   const rosterSize = document.getElementById('roster').value;
 
   const tournamentTotal = tournaments.reduce((sum, t) => sum + (parseFloat(t.fee) || 0), 0);
+  const uniformsPerPlayerTotal = uniforms.reduce((sum, u) => sum + (parseFloat(u.cost) || 0), 0);
+  const uniformsTotal = uniformsPerPlayerTotal * (parseFloat(rosterSize) || 1);
   const equipmentTotal = equipment.reduce((sum, e) => sum + (parseFloat(e.cost) || 0), 0);
   const insuranceTotal = insurance.reduce((sum, i) => sum + (parseFloat(i.cost) || 0), 0);
   const trainingTotal = training.reduce((sum, t) => sum + (parseFloat(t.cost) || 0), 0);
-  const operationsTotal = equipmentTotal + insuranceTotal + trainingTotal;
+  const operationsTotal = equipmentTotal + uniformsTotal + insuranceTotal + trainingTotal;
   const grandTotal = tournamentTotal + operationsTotal;
-  const perPlayer = grandTotal / rosterSize;
+  const perPlayer = grandTotal / (parseFloat(rosterSize) || 1);
 
   // Create HTML content that Word can open
   const htmlContent = `<!DOCTYPE html>
@@ -947,6 +983,27 @@ function exportToDOCX() {
         <td colspan="3">Total Tournament Costs</td>
         <td>${formatCurrency(tournamentTotal)}</td>
     </tr>
+</table>
+
+<h2>Uniforms</h2>
+<table>
+  <tr>
+    <th>Item</th>
+    <th>Cost Per Player</th>
+    <th>Total Cost</th>
+  </tr>
+  ${uniforms.map(u => `
+  <tr>
+    <td>${u.item}</td>
+    <td>${formatCurrency(u.cost)}</td>
+    <td>${formatCurrency((parseFloat(u.cost) || 0) * (parseFloat(rosterSize) || 1))}</td>
+  </tr>
+  `).join('')}
+  <tr class="total-row">
+    <td>Total Uniform Costs</td>
+    <td></td>
+    <td>${formatCurrency(uniformsTotal)}</td>
+  </tr>
 </table>
 
 <h2>Equipment</h2>
