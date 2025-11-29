@@ -6,29 +6,21 @@
     <title>WGYS Select Baseball &amp; Softball - Budget &amp; Pricing Template</title>
     <style>
         :root {
-            --color-white: rgba(255, 255, 255, 1);
-            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
             --color-gray-200: rgba(245, 245, 245, 1);
-            --color-gray-300: rgba(167, 169, 169, 1);
-            --color-gray-400: rgba(119, 124, 124, 1);
-            --color-slate-500: rgba(98, 108, 113, 1);
-            --color-charcoal-700: rgba(31, 33, 33, 1);
-            --color-charcoal-800: rgba(38, 40, 40, 1);
             --color-slate-900: rgba(19, 52, 59, 1);
-            --color-teal-300: rgba(50, 184, 198, 1);
-            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
             --color-teal-500: rgba(33, 128, 141, 1);
             --color-teal-600: rgba(29, 116, 128, 1);
-            --color-teal-800: rgba(41, 150, 161, 1);
-            --color-red-400: rgba(255, 84, 89, 1);
             --color-red-500: rgba(192, 21, 47, 1);
-            --color-text: var(--color-gray-200);
-            --color-text-secondary: rgba(167, 169, 169, 0.7);
-            --color-background: var(--color-charcoal-700);
-            --color-surface: var(--color-charcoal-800);
-            --color-primary: var(--color-teal-300);
-            --color-primary-hover: var(--color-teal-400);
-            --color-error: var(--color-red-400);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-error: var(--color-red-500);
             --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
@@ -36,28 +28,21 @@
 
         html { font-size: 14px; font-family: var(--font-family-base); color: var(--color-text); background-color: var(--color-background); }
         body { margin: 0; padding: 20px; }
-        
-        .header { display: flex; align-items: center; gap: 16px; margin-bottom: 30px; border-bottom: 1px solid rgba(119, 124, 124, 0.3); padding-bottom: 20px; }
-        .logo { width: 60px; height: 60px; }
-        .header-text h1 { font-size: 24px; margin: 0 0 4px 0; font-weight: 600; color: var(--color-primary); }
-        .header-text a { color: var(--color-text-secondary); text-decoration: none; font-size: 13px; transition: color 150ms ease; }
-        .header-text a:hover { color: var(--color-primary); }
-        
-        h1 { font-size: 28px; margin: 0 0 20px 0; font-weight: 600; color: var(--color-primary); }
-        h2 { font-size: 18px; margin: 24px 0 16px 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center; color: var(--color-primary); }
-        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 13px; color: var(--color-text); }
-        input, select { width: 100%; padding: 8px 12px; border: 1px solid rgba(119, 124, 124, 0.3); border-radius: 6px; font-size: 14px; background-color: rgba(119, 124, 124, 0.1); color: var(--color-text); }
-        input:focus, select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(50, 184, 198, 0.2); }
+        h1 { font-size: 28px; margin: 0 0 20px 0; font-weight: 600; }
+        h2 { font-size: 18px; margin: 24px 0 16px 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 13px; }
+        input, select { width: 100%; padding: 8px 12px; border: 1px solid rgba(19, 52, 59, 0.2); border-radius: 6px; font-size: 14px; background-color: var(--color-surface); }
+        input:focus, select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(33, 128, 141, 0.1); }
 
         .container { max-width: 1200px; margin: 0 auto; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
         .form-group { margin-bottom: 16px; }
-        .section { margin-bottom: 32px; background: var(--color-surface); padding: 20px; border-radius: 8px; border: 1px solid rgba(119, 124, 124, 0.2); }
+        .section { margin-bottom: 32px; background: var(--color-surface); padding: 20px; border-radius: 8px; border: 1px solid rgba(19, 52, 59, 0.1); }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; background: rgba(0, 0, 0, 0.3); border-radius: 6px; overflow: hidden; }
-        thead { background: rgba(50, 184, 198, 0.15); }
-        th { padding: 12px; text-align: left; font-weight: 600; font-size: 13px; color: var(--color-primary); }
-        td { padding: 12px; border-bottom: 1px solid rgba(119, 124, 124, 0.2); color: var(--color-text); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; background: white; border-radius: 6px; overflow: hidden; }
+        thead { background: rgba(33, 128, 141, 0.08); }
+        th { padding: 12px; text-align: left; font-weight: 600; font-size: 13px; }
+        td { padding: 12px; border-bottom: 1px solid rgba(19, 52, 59, 0.1); }
         tr:last-child td { border-bottom: none; }
         input[type="number"] { width: 100%; }
 
@@ -72,16 +57,16 @@
             border: none;
             transition: all 150ms ease;
         }
-        .btn-primary { background: var(--color-primary); color: var(--color-background); }
+        .btn-primary { background: var(--color-primary); color: white; }
         .btn-primary:hover { background: var(--color-primary-hover); }
-        .btn-secondary { background: rgba(50, 184, 198, 0.15); color: var(--color-primary); margin-left: 8px; }
-        .btn-secondary:hover { background: rgba(50, 184, 198, 0.25); }
-        .btn-danger { background: rgba(255, 84, 89, 0.15); color: var(--color-error); }
-        .btn-danger:hover { background: rgba(255, 84, 89, 0.25); }
+        .btn-secondary { background: rgba(33, 128, 141, 0.1); color: var(--color-primary); margin-left: 8px; }
+        .btn-secondary:hover { background: rgba(33, 128, 141, 0.2); }
+        .btn-danger { background: rgba(192, 21, 47, 0.1); color: var(--color-error); }
+        .btn-danger:hover { background: rgba(192, 21, 47, 0.2); }
         .btn-sm { padding: 6px 12px; font-size: 12px; }
 
-        .summary { background: rgba(50, 184, 198, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid var(--color-primary); }
-        .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 15px; color: var(--color-text); }
+        .summary { background: rgba(33, 128, 141, 0.08); padding: 20px; border-radius: 8px; border-left: 4px solid var(--color-primary); }
+        .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 15px; }
         .summary-row:last-child { margin-bottom: 0; }
         .summary-label { font-weight: 500; }
         .summary-value { font-weight: 600; color: var(--color-primary); }
@@ -97,15 +82,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <img src="https://www.westgeorgiayouthsports.org/documents/73886b1f-4ce8-4475-85f2-acd307ad29eb" alt="WGYS Logo" class="logo">
-            <div class="header-text">
-                <h1>WGYS Select Baseball &amp; Softball</h1>
-                <a href="https://www.westgeorgiayouthsports.org" target="_blank">www.westgeorgiayouthsports.org</a>
-            </div>
-        </div>
-
-        <h1>Budget &amp; Pricing Template</h1>
+        <h1>⚾ WGYS Select Baseball &amp; Softball - Budget &amp; Pricing Template</h1>
 
         <!-- Configuration Section -->
         <div class="section">
