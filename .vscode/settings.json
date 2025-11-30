@@ -7,5 +7,6 @@
       "args": []
     }
   },
-  "terminal.integrated.defaultProfile.windows": "PowerShell 7.5.4"
+  "terminal.integrated.defaultProfile.windows": "PowerShell 7.5.4",
+  "amazonQ.telemetry": false
 }

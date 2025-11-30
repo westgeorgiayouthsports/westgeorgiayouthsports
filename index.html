@@ -1,481 +1,822 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WGYS Select Baseball & Softball - Budget & Pricing Template</title>
-    <link rel="icon" href="/favicon.ico?v=20251129">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20251129">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20251129">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20251129">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20251129">
-    <link rel="manifest" href="/site.webmanifest?v=20251129">
-    <meta name="theme-color" content="#208085">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WGYS Select Baseball & Softball - Budget & Pricing Template</title>
+  <link rel="icon" href="favicon.ico?v=20251129">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20251129">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20251129">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20251129">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20251129">
+  <link rel="manifest" href="site.webmanifest?v=20251129">
+  <meta name="theme-color" content="#208085">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
-    <script src="app.js" defer></script>
-    <style>
-        :root {
-            --color-cream-50: rgba(252, 252, 249, 1);
-            --color-cream-100: rgba(255, 255, 253, 1);
-            --color-gray-200: rgba(245, 245, 245, 1);
-            --color-gray-300: rgba(167, 169, 169, 1);
-            --color-gray-400: rgba(119, 124, 124, 1);
-            --color-slate-500: rgba(98, 108, 113, 1);
-            --color-brown-600: rgba(94, 82, 64, 1);
-            --color-slate-900: rgba(19, 52, 59, 1);
-            --color-teal-500: rgba(33, 128, 141, 1);
-            --color-teal-600: rgba(29, 116, 128, 1);
-            --color-teal-700: rgba(26, 104, 115, 1);
-            --color-brown-600-rgb: 94, 82, 64;
-            --color-teal-500-rgb: 33, 128, 141;
-            --color-slate-900-rgb: 19, 52, 59;
+  <script type="module" src="app.js"></script>
+  <style>
+    :root {
+      --color-cream-50: rgba(252, 252, 249, 1);
+      --color-cream-100: rgba(255, 255, 253, 1);
+      --color-gray-200: rgba(245, 245, 245, 1);
+      --color-gray-300: rgba(167, 169, 169, 1);
+      --color-gray-400: rgba(119, 124, 124, 1);
+      --color-slate-500: rgba(98, 108, 113, 1);
+      --color-brown-600: rgba(94, 82, 64, 1);
+      --color-slate-900: rgba(19, 52, 59, 1);
+      --color-teal-500: rgba(33, 128, 141, 1);
+      --color-teal-600: rgba(29, 116, 128, 1);
+      --color-teal-700: rgba(26, 104, 115, 1);
+      --color-brown-600-rgb: 94, 82, 64;
+      --color-teal-500-rgb: 33, 128, 141;
+      --color-slate-900-rgb: 19, 52, 59;
 
-            /* Dark theme (default) */
-            --color-background: #1a1a1a;
-            --color-surface: #242424;
-            --color-text: #f0f0f0;
-            --color-text-secondary: #a0a0a0;
-            --color-primary: #32b8c6;
-            --color-primary-hover: #2da8b8;
-            --color-primary-active: #1a96a4;
-            --color-secondary: rgba(255, 255, 255, 0.08);
-            --color-secondary-hover: rgba(255, 255, 255, 0.12);
-            --color-secondary-active: rgba(255, 255, 255, 0.15);
-            --color-border: rgba(255, 255, 255, 0.1);
-            --color-btn-primary-text: #1a1a1a;
-            --color-card-border: rgba(255, 255, 255, 0.08);
-            --color-card-border-inner: rgba(255, 255, 255, 0.08);
-        }
+      /* Dark theme (default) */
+      --color-background: #1a1a1a;
+      --color-surface: #242424;
+      --color-text: #f0f0f0;
+      --color-text-secondary: #a0a0a0;
+      --color-primary: #32b8c6;
+      --color-primary-hover: #2da8b8;
+      --color-primary-active: #1a96a4;
+      --color-secondary: rgba(255, 255, 255, 0.08);
+      --color-secondary-hover: rgba(255, 255, 255, 0.12);
+      --color-secondary-active: rgba(255, 255, 255, 0.15);
+      --color-border: rgba(255, 255, 255, 0.1);
+      --color-btn-primary-text: #1a1a1a;
+      --color-card-border: rgba(255, 255, 255, 0.08);
+      --color-card-border-inner: rgba(255, 255, 255, 0.08);
+    }
 
-        html[data-theme="light"] {
-            --color-background: var(--color-cream-50);
-            --color-surface: var(--color-cream-100);
-            --color-text: var(--color-slate-900);
-            --color-text-secondary: var(--color-slate-500);
-            --color-primary: var(--color-teal-500);
-            --color-primary-hover: var(--color-teal-600);
-            --color-primary-active: var(--color-teal-700);
-            --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
-            --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
-            --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
-            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
-            --color-btn-primary-text: var(--color-cream-50);
-            --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
-            --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
-        }
+    html[data-theme="light"] {
+      --color-background: var(--color-cream-50);
+      --color-surface: var(--color-cream-100);
+      --color-text: var(--color-slate-900);
+      --color-text-secondary: var(--color-slate-500);
+      --color-primary: var(--color-teal-500);
+      --color-primary-hover: var(--color-teal-600);
+      --color-primary-active: var(--color-teal-700);
+      --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+      --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+      --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
+      --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+      --color-btn-primary-text: var(--color-cream-50);
+      --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+      --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
+    }
 
-        * { box-sizing: border-box; }
-        html { font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif; color: var(--color-text); background-color: var(--color-background); transition: background-color 200ms ease, color 200ms ease; }
-        body { margin: 0; padding: var(--space-16); }
+    * {
+      box-sizing: border-box;
+    }
 
-        :root {
-            --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            --font-size-base: 14px;
-            --font-size-sm: 12px;
-            --font-size-md: 14px;
-            --font-size-lg: 16px;
-            --font-size-xl: 18px;
-            --font-size-2xl: 20px;
-            --font-size-3xl: 24px;
-            --font-weight-normal: 400;
-            --font-weight-medium: 500;
-            --font-weight-semibold: 550;
-            --font-weight-bold: 600;
-            --space-4: 4px;
-            --space-6: 6px;
-            --space-8: 8px;
-            --space-12: 12px;
-            --space-16: 16px;
-            --space-20: 20px;
-            --space-24: 24px;
-            --space-32: 32px;
-        }
+    html {
+      font-size: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+      color: var(--color-text);
+      background-color: var(--color-background);
+      transition: background-color 200ms ease, color 200ms ease;
+    }
 
-        .theme-toggle-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-            gap: 8px;
-        }
+    body {
+      margin: 0;
+      padding: var(--space-16);
+    }
 
-        .theme-toggle {
-            display: flex;
-            gap: 4px;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            padding: 4px;
-        }
+    :root {
+      --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-size-base: 14px;
+      --font-size-sm: 12px;
+      --font-size-md: 14px;
+      --font-size-lg: 16px;
+      --font-size-xl: 18px;
+      --font-size-2xl: 20px;
+      --font-size-3xl: 24px;
+      --font-weight-normal: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 550;
+      --font-weight-bold: 600;
+      --space-4: 4px;
+      --space-6: 6px;
+      --space-8: 8px;
+      --space-12: 12px;
+      --space-16: 16px;
+      --space-20: 20px;
+      --space-24: 24px;
+      --space-32: 32px;
+    }
 
-        .theme-btn {
-            padding: 6px 12px;
-            border: none;
-            background: transparent;
-            color: var(--color-text-secondary);
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            transition: all 150ms ease;
-        }
+    .theme-toggle-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+      gap: 8px;
+    }
 
-        .theme-btn.active {
-            background: var(--color-primary);
-            color: var(--color-btn-primary-text);
-        }
+    .theme-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 4px;
+    }
 
-        .theme-btn:hover:not(.active) {
-            background: var(--color-secondary-hover);
-        }
+    .theme-btn {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 150ms ease;
+    }
 
-        .header { display: flex; align-items: center; gap: 16px; margin-bottom: 30px; border-bottom: 1px solid var(--color-border); padding-bottom: 20px; }
-        .logo { width: 60px; height: 60px; }
-        .header-text h1 { font-size: 24px; margin: 0 0 4px 0; font-weight: 600; color: var(--color-primary); }
-        .header-text a { color: var(--color-text-secondary); text-decoration: none; font-size: 13px; }
+    .theme-btn.active {
+      background: var(--color-primary);
+      color: var(--color-btn-primary-text);
+    }
 
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { font-size: var(--font-size-3xl); margin: 0 0 20px 0; font-weight: 600; color: var(--color-primary); }
-        h2 { font-size: var(--font-size-xl); margin: 0; font-weight: 600; color: var(--color-primary); }
+    .theme-btn:hover:not(.active) {
+      background: var(--color-secondary-hover);
+    }
 
-        .section { margin-bottom: var(--space-32); background: var(--color-surface); padding: var(--space-20); border-radius: 8px; border: 1px solid var(--color-card-border); transition: background-color 200ms ease; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-20); }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 20px;
+    }
 
-        .param-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; margin-top: 20px; }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 13px; }
-        input, select { width: 100%; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px; font-size: 14px; background-color: var(--color-secondary); color: var(--color-text); transition: all 150ms ease; }
-        select { background-color: var(--color-secondary) !important; }
-        select option { background-color: var(--color-surface); color: var(--color-text); }
-        select:focus { outline: none; border-color: var(--color-primary); }
-        input:focus, select:focus { outline: none; border-color: var(--color-primary); }
+    .logo {
+      width: 60px;
+      height: 60px;
+    }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; background: var(--color-secondary); border-radius: 6px; overflow: hidden; }
-        thead { background: rgba(var(--color-teal-500-rgb), 0.15); }
-        th { padding: 12px; text-align: left; font-weight: 600; font-size: 13px; color: var(--color-primary); }
-        td { padding: 12px; border-bottom: 1px solid var(--color-border); }
-        tr:last-child td { border-bottom: none; }
+    .header-text h1 {
+      font-size: 24px;
+      margin: 0 0 4px 0;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
 
-        .btn { display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 150ms ease; }
-        .btn-primary { background: var(--color-primary); color: var(--color-btn-primary-text); }
-        .btn-primary:hover { background: var(--color-primary-hover); }
-        .btn-secondary { background: var(--color-secondary); color: var(--color-primary); margin-left: 8px; }
-        .btn-secondary:hover { background: var(--color-secondary-hover); }
-        .btn-danger { background: rgba(255, 84, 89, 0.15); color: #ff5459; }
-        .btn-danger:hover { background: rgba(255, 84, 89, 0.25); }
-        .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .header-text a {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+    }
 
-        .section-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--color-text-secondary); margin-top: 12px; }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .summary-card { background: rgba(var(--color-teal-500-rgb), 0.08); border-radius: 8px; padding: 20px; border: 1px solid var(--color-card-border-inner); text-align: center; transition: all 150ms ease; }
-        .summary-card.highlight { background: rgba(var(--color-teal-500-rgb), 0.15); border-color: var(--color-primary); }
-        .summary-label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; margin-bottom: 8px; }
-        .summary-value { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-primary); }
+    h1 {
+      font-size: var(--font-size-3xl);
+      margin: 0 0 20px 0;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
 
-        .breakdown-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .breakdown-item { background: rgba(var(--color-teal-500-rgb), 0.08); border-radius: 8px; padding: 16px; text-align: center; border: 1px solid var(--color-card-border); }
-        .breakdown-percentage { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-primary); }
+    h2 {
+      font-size: var(--font-size-xl);
+      margin: 0;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
 
-        .view-toggle { display: flex; gap: 8px; }
-        .toggle-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 150ms ease; }
-        .toggle-btn:hover { background: var(--color-secondary-hover); }
-        .toggle-btn.active { background: var(--color-primary); color: var(--color-btn-primary-text); border-color: var(--color-primary); }
+    .section {
+      margin-bottom: var(--space-32);
+      background: var(--color-surface);
+      padding: var(--space-20);
+      border-radius: 8px;
+      border: 1px solid var(--color-card-border);
+      transition: background-color 200ms ease;
+    }
 
-        .view-container { display: none; }
-        .view-container.active { display: block; animation: fadeIn 200ms ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-20);
+    }
 
-        .summary-line-items { background: var(--color-secondary); border-radius: 8px; padding: 20px; border: 1px solid var(--color-card-border); }
-        .line-item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--color-border); font-size: 14px; }
-        .line-item-row:last-child { border-bottom: none; }
-        .line-item-row.grand-total { font-weight: 600; font-size: 16px; padding: 16px 0; }
-        .line-item-label { color: var(--color-text); font-weight: 500; }
-        .line-item-value { color: var(--color-primary); font-weight: 600; }
-        .line-item-separator { height: 1px; background: var(--color-border); margin: 8px 0; }
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+      margin-top: 20px;
+    }
 
-        .action-buttons { display: flex; gap: 12px; margin-top: 24px; justify-content: center; }
-        .action-buttons .btn { flex: 1; max-width: 200px; justify-content: center; }
+    .form-group {
+      margin-bottom: 16px;
+    }
 
-        @media (max-width: 768px) {
-            .action-buttons { flex-direction: column; }
-            .action-buttons .btn { max-width: 100%; }
-        }
-    </style>
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: var(--color-secondary);
+      color: var(--color-text);
+      transition: all 150ms ease;
+    }
+
+    select {
+      background-color: var(--color-secondary) !important;
+    }
+
+    select option {
+      background-color: var(--color-surface);
+      color: var(--color-text);
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      background: var(--color-secondary);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    thead {
+      background: rgba(var(--color-teal-500-rgb), 0.15);
+    }
+
+    th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--color-primary);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 150ms ease;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-btn-primary-text);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--color-secondary);
+      color: var(--color-primary);
+      margin-left: 8px;
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-secondary-hover);
+    }
+
+    .btn-danger {
+      background: rgba(255, 84, 89, 0.15);
+      color: #ff5459;
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 84, 89, 0.25);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .section-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-top: 12px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .summary-card {
+      background: rgba(var(--color-teal-500-rgb), 0.08);
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--color-card-border-inner);
+      text-align: center;
+      transition: all 150ms ease;
+    }
+
+    .summary-card.highlight {
+      background: rgba(var(--color-teal-500-rgb), 0.15);
+      border-color: var(--color-primary);
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary);
+    }
+
+    .breakdown-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .breakdown-item {
+      background: rgba(var(--color-teal-500-rgb), 0.08);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid var(--color-card-border);
+    }
+
+    .breakdown-item.highlight {
+      background: rgba(var(--color-teal-500-rgb), 0.15);
+      border-color: var(--color-primary);
+    }
+
+    .breakdown-percentage {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary);
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toggle-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .toggle-btn:hover {
+      background: var(--color-secondary-hover);
+    }
+
+    .toggle-btn.active {
+      background: var(--color-primary);
+      color: var(--color-btn-primary-text);
+      border-color: var(--color-primary);
+    }
+
+    .view-container {
+      display: none;
+    }
+
+    .view-container.active {
+      display: block;
+      animation: fadeIn 200ms ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .summary-line-items {
+      background: var(--color-secondary);
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--color-card-border);
+    }
+
+    .line-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 14px;
+    }
+
+    .line-item-row:last-child {
+      border-bottom: none;
+    }
+
+    .line-item-row.grand-total {
+      font-weight: 600;
+      font-size: 16px;
+      padding: 16px 0;
+    }
+
+    .line-item-label {
+      color: var(--color-text);
+      font-weight: 500;
+    }
+
+    .line-item-value {
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .line-item-separator {
+      height: 1px;
+      background: var(--color-border);
+      margin: 8px 0;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      justify-content: center;
+    }
+
+    .action-buttons .btn {
+      flex: 1;
+      max-width: 200px;
+      justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-buttons .btn {
+        max-width: 100%;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <!-- Theme Toggle -->
-        <div class="theme-toggle-container">
-            <div class="theme-toggle">
-                <button class="theme-btn active" id="themeButtonDark" data-theme="dark">🌙 Dark</button>
-                <button class="theme-btn" id="themeButtonLight" data-theme="light">☀️ Light</button>
-            </div>
-        </div>
-
-        <!-- Header -->
-        <div class="header">
-            <img src="https://www.westgeorgiayouthsports.org/documents/73886b1f-4ce8-4475-85f2-acd307ad29eb" alt="WGYS Logo" class="logo">
-            <div class="header-text">
-                <h1>WGYS Select Baseball & Softball</h1>
-                <a href="https://www.westgeorgiayouthsports.org" target="_blank">www.westgeorgiayouthsports.org</a>
-            </div>
-        </div>
-
-        <h1>Budget & Pricing Template</h1>
-
-        <!-- Team Configuration -->
-        <section class="section">
-            <div class="section-header">
-                <h2>Team Configuration</h2>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-primary btn-sm" id="newTeamBtn">+ New Team</button>
-                    <button class="btn btn-secondary btn-sm" id="deleteTeamBtn">Delete Team</button>
-                </div>
-            </div>
-            <div class="param-grid">
-                <div class="form-group">
-                    <label for="teamName">Team Name</label>
-                    <input type="text" id="teamName" placeholder="e.g., Velocity Select 12U">
-                </div>
-                <div class="form-group">
-                    <label for="teamLoader">Load Team</label>
-                    <select id="teamLoader">
-                        <option value="">-- Select Team --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="sport">Sport</label>
-                    <select id="sport">
-                        <option value="Baseball">Baseball</option>
-                        <option value="Softball">Softball</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="season">Season Year</label>
-                    <input type="number" id="season" min="2020" max="2050">
-                </div>
-                <div class="form-group">
-                    <label for="roster">Roster Size (# Players)</label>
-                    <input type="number" id="roster" value="12" min="1" max="30">
-                </div>
-            </div>
-        </section>
-
-        <!-- Tournaments -->
-        <section class="section">
-            <div class="section-header">
-                <h2>Tournament Costs</h2>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>Tournament Name</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Entry Fee</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="tournamentsBody"></tbody>
-            </table>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary btn-sm" id="addTournamentBtn">+ Add Tournament</button>
-                <button class="btn btn-secondary btn-sm" id="clearTournamentsBtn">Clear All</button>
-            </div>
-            <div class="section-footer">
-                <span>Total Tournaments: <strong id="tournamentCount">0</strong></span>
-                <span>Total Cost: <strong id="tournamentTotal">$0.00</strong></span>
-            </div>
-        </section>
-
-        <!-- Uniform Costs -->
-        <section class="section">
-            <div class="section-header">
-                <h2>Uniform Costs</h2>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Cost Per Player</th>
-                        <th>Total Cost</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="uniformsBody"></tbody>
-            </table>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary btn-sm" id="addUniformBtn">+ Add Item</button>
-                <button class="btn btn-secondary btn-sm" id="clearUniformsBtn">Clear All</button>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <span>Per Player Total: <strong id="uniformsPerPlayer">$0.00</strong> × <strong id="rosterCount">0</strong> players</span>
-            </div>
-            <div class="section-footer">
-                <span style="margin-left: auto;">Subtotal: <strong id="uniformsTotal">$0.00</strong></span>
-            </div>
-        </section>
-
-        <!-- Equipment -->
-        <section class="section">
-            <div class="section-header">
-                <h2>Equipment</h2>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Cost</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="equipmentBody"></tbody>
-            </table>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary btn-sm" id="addEquipmentBtn">+ Add Item</button>
-                <button class="btn btn-secondary btn-sm" id="clearEquipmentBtn">Clear All</button>
-            </div>
-            <div class="section-footer">
-                <span style="margin-left: auto;">Subtotal: <strong id="equipmentTotal">$0.00</strong></span>
-            </div>
-        </section>
-
-        <!-- Insurance -->
-        <section class="section">
-            <div class="section-header">
-                <h2>Insurance & Memberships</h2>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Cost</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="insuranceBody"></tbody>
-            </table>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary btn-sm" id="addInsuranceBtn">+ Add Item</button>
-                <button class="btn btn-secondary btn-sm" id="clearInsuranceBtn">Clear All</button>
-            </div>
-            <div class="section-footer">
-                <span style="margin-left: auto;">Subtotal: <strong id="insuranceTotal">$0.00</strong></span>
-            </div>
-        </section>
-
-        <!-- Training -->
-        <section class="section">
-            <div class="section-header">
-                <h2>Training</h2>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Cost</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="trainingBody"></tbody>
-            </table>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary btn-sm" id="addTrainingBtn">+ Add Item</button>
-                <button class="btn btn-secondary btn-sm" id="clearTrainingBtn">Clear All</button>
-            </div>
-            <div class="section-footer">
-                <span style="margin-left: auto;">Subtotal: <strong id="trainingTotal">$0.00</strong></span>
-            </div>
-        </section>
-
-        <!-- Budget Summary -->
-        <section class="section">
-            <div class="section-header">
-                <h2>Budget Summary</h2>
-                <div class="view-toggle">
-                    <button class="toggle-btn active" id="toggleBubbleView">Summary View</button>
-                    <button class="toggle-btn" id="toggleLineView">Detail View</button>
-                </div>
-            </div>
-
-            <!-- Bubble View (Default) -->
-            <div id="bubbleView" class="view-container active">
-                <div class="summary-grid">
-                    <div class="summary-card">
-                        <div class="summary-label">Tournament Costs</div>
-                        <div class="summary-value" id="summaryTournaments">$0.00</div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="summary-label">Operations Costs</div>
-                        <div class="summary-value" id="summaryOperations">$0.00</div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="summary-label">Grand Total</div>
-                        <div class="summary-value" id="summaryGrandTotal">$0.00</div>
-                    </div>
-                    <div class="summary-card highlight">
-                        <div class="summary-label">Per-Player Fee</div>
-                        <div class="summary-value" id="summaryPerPlayer">$0.00</div>
-                    </div>
-                </div>
-                <div class="breakdown-container">
-                    <div class="breakdown-item">
-                        <div class="summary-label">Tournament Costs %</div>
-                        <div class="breakdown-percentage" id="tournamentPercentage">0%</div>
-                    </div>
-                    <div class="breakdown-item">
-                        <div class="summary-label">Operations Costs %</div>
-                        <div class="breakdown-percentage" id="operationsPercentage">0%</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Detail View -->
-            <div id="lineView" class="view-container">
-                <div class="summary-line-items">
-                    <div class="line-item-row">
-                        <span class="line-item-label">Tournament Costs:</span>
-                        <span class="line-item-value" id="lineItemTournaments">$0.00</span>
-                    </div>
-                    <div class="line-item-row">
-                        <span class="line-item-label">Equipment Costs:</span>
-                        <span class="line-item-value" id="lineItemEquipment">$0.00</span>
-                    </div>
-                    <div class="line-item-row">
-                        <span class="line-item-label">Uniform Costs:</span>
-                        <span class="line-item-value" id="lineItemUniforms">$0.00</span>
-                    </div>
-                    <div class="line-item-row">
-                        <span class="line-item-label">Insurance & Memberships:</span>
-                        <span class="line-item-value" id="lineItemInsurance">$0.00</span>
-                    </div>
-                    <div class="line-item-row">
-                        <span class="line-item-label">Training Costs:</span>
-                        <span class="line-item-value" id="lineItemTraining">$0.00</span>
-                    </div>
-                    <div class="line-item-separator"></div>
-                    <div class="line-item-row grand-total">
-                        <span class="line-item-label">GRAND TOTAL:</span>
-                        <span class="line-item-value" id="lineItemGrandTotal">$0.00</span>
-                    </div>
-                    <div class="line-item-row">
-                        <span class="line-item-label">Cost Per Player:</span>
-                        <span class="line-item-value" id="lineItemPerPlayer">$0.00</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Export Buttons -->
-        <div class="action-buttons">
-            <button class="btn btn-primary" id="exportExcelBtn">📊 Export to Excel</button>
-            <button class="btn btn-primary" id="exportPdfBtn">📄 Export to PDF</button>
-            <button class="btn btn-primary" id="exportDocxBtn">📝 Export to Word</button>
-            <button class="btn btn-primary" id="saveTeamsBtn">💾 Save Teams</button>
-        </div>
+  <div id="toastContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000;"></div>
+  <div class="container">
+    <!-- Theme Toggle -->
+    <div class="theme-toggle-container">
+      <div class="theme-toggle">
+        <button class="theme-btn active" id="themeButtonDark" data-theme="dark">🌙 Dark</button>
+        <button class="theme-btn" id="themeButtonLight" data-theme="light">☀️ Light</button>
+      </div>
     </div>
+
+    <!-- Header -->
+    <div class="header">
+      <img src="https://www.westgeorgiayouthsports.org/documents/73886b1f-4ce8-4475-85f2-acd307ad29eb" alt="WGYS Logo"
+        class="logo">
+      <div class="header-text">
+        <h1>WGYS Select Baseball & Softball</h1>
+        <a href="https://www.westgeorgiayouthsports.org" target="_blank">www.westgeorgiayouthsports.org</a>
+      </div>
+    </div>
+
+    <h1>Budget & Pricing Template</h1>
+
+    <!-- Team Configuration -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Team Configuration</h2>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary btn-sm" id="newTeamBtn">+ New Team</button>
+          <button class="btn btn-secondary btn-sm" id="deleteTeamBtn">Delete Team</button>
+        </div>
+      </div>
+      <div class="param-grid">
+        <div class="form-group">
+          <label for="teamName">Team Name</label>
+          <input type="text" id="teamName" placeholder="e.g., Velocity Select 12U">
+        </div>
+        <div class="form-group">
+          <label for="teamLoader">Load Team</label>
+          <select id="teamLoader">
+            <option value="">-- Select Team --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sport">Sport</label>
+          <select id="sport">
+            <option value="Baseball">Baseball</option>
+            <option value="Softball">Softball</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="season">Season Year</label>
+          <input type="number" id="season" min="2020" max="2050">
+        </div>
+        <div class="form-group">
+          <label for="roster">Roster Size (# Players)</label>
+          <input type="number" id="roster" value="12" min="1" max="30">
+        </div>
+      </div>
+    </section>
+
+    <!-- Tournaments -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Tournament Costs</h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Tournament Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Entry Fee</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tournamentsBody"></tbody>
+      </table>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary btn-sm" id="addTournamentBtn">+ Add Tournament</button>
+        <button class="btn btn-secondary btn-sm" id="clearTournamentsBtn">Clear All</button>
+      </div>
+      <div class="section-footer">
+        <span>Total Tournaments: <strong id="tournamentCount">0</strong></span>
+        <span>Total Cost: <strong id="tournamentTotal">$0.00</strong></span>
+      </div>
+    </section>
+
+    <!-- Uniform Costs -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Uniform Costs</h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Cost Per Player</th>
+            <th>Total Cost</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="uniformsBody"></tbody>
+      </table>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary btn-sm" id="addUniformBtn">+ Add Item</button>
+        <button class="btn btn-secondary btn-sm" id="clearUniformsBtn">Clear All</button>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <span>Per Player Total: <strong id="uniformsPerPlayer">$0.00</strong> × <strong id="rosterCount">0</strong>
+          players</span>
+      </div>
+      <div class="section-footer">
+        <span style="margin-left: auto;">Subtotal: <strong id="uniformsTotal">$0.00</strong></span>
+      </div>
+    </section>
+
+    <!-- Equipment -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Equipment</h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Cost</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="equipmentBody"></tbody>
+      </table>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary btn-sm" id="addEquipmentBtn">+ Add Item</button>
+        <button class="btn btn-secondary btn-sm" id="clearEquipmentBtn">Clear All</button>
+      </div>
+      <div class="section-footer">
+        <span style="margin-left: auto;">Subtotal: <strong id="equipmentTotal">$0.00</strong></span>
+      </div>
+    </section>
+
+    <!-- Insurance -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Insurance & Memberships</h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Cost</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="insuranceBody"></tbody>
+      </table>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary btn-sm" id="addInsuranceBtn">+ Add Item</button>
+        <button class="btn btn-secondary btn-sm" id="clearInsuranceBtn">Clear All</button>
+      </div>
+      <div class="section-footer">
+        <span style="margin-left: auto;">Subtotal: <strong id="insuranceTotal">$0.00</strong></span>
+      </div>
+    </section>
+
+    <!-- Training -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Training</h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Cost</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="trainingBody"></tbody>
+      </table>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary btn-sm" id="addTrainingBtn">+ Add Item</button>
+        <button class="btn btn-secondary btn-sm" id="clearTrainingBtn">Clear All</button>
+      </div>
+      <div class="section-footer">
+        <span style="margin-left: auto;">Subtotal: <strong id="trainingTotal">$0.00</strong></span>
+      </div>
+    </section>
+
+    <!-- Budget Summary -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Budget Summary</h2>
+        <div class="view-toggle">
+          <button class="toggle-btn active" id="toggleBubbleView">Summary View</button>
+          <button class="toggle-btn" id="toggleLineView">Detail View</button>
+        </div>
+      </div>
+
+      <!-- Bubble View (Default) -->
+      <div id="bubbleView" class="view-container active">
+        <div class="summary-grid">
+          <div class="summary-card highlight">
+            <div class="summary-label">Tournament Costs</div>
+            <div class="summary-value" id="summaryTournaments">$0.00</div>
+          </div>
+          <div class="summary-card highlight">
+            <div class="summary-label">Operations Costs</div>
+            <div class="summary-value" id="summaryOperations">$0.00</div>
+          </div>
+          <div class="summary-card highlight">
+            <div class="summary-label">Grand Total</div>
+            <div class="summary-value" id="summaryGrandTotal">$0.00</div>
+          </div>
+          <div class="summary-card highlight">
+            <div class="summary-label">Per-Player Fee</div>
+            <div class="summary-value" id="summaryPerPlayer">$0.00</div>
+          </div>
+        </div>
+        <div class="breakdown-container">
+          <div class="breakdown-item highlight">
+            <div class="summary-label">Tournament Costs %</div>
+            <div class="breakdown-percentage" id="tournamentPercentage">0%</div>
+          </div>
+          <div class="breakdown-item highlight">
+            <div class="summary-label">Operations Costs %</div>
+            <div class="breakdown-percentage" id="operationsPercentage">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail View -->
+      <div id="lineView" class="view-container">
+        <div class="summary-line-items">
+          <div class="line-item-row">
+            <span class="line-item-label">Tournament Costs:</span>
+            <span class="line-item-value" id="lineItemTournaments">$0.00</span>
+          </div>
+          <div class="line-item-row">
+            <span class="line-item-label">Equipment Costs:</span>
+            <span class="line-item-value" id="lineItemEquipment">$0.00</span>
+          </div>
+          <div class="line-item-row">
+            <span class="line-item-label">Uniform Costs:</span>
+            <span class="line-item-value" id="lineItemUniforms">$0.00</span>
+          </div>
+          <div class="line-item-row">
+            <span class="line-item-label">Insurance & Memberships:</span>
+            <span class="line-item-value" id="lineItemInsurance">$0.00</span>
+          </div>
+          <div class="line-item-row">
+            <span class="line-item-label">Training Costs:</span>
+            <span class="line-item-value" id="lineItemTraining">$0.00</span>
+          </div>
+          <div class="line-item-separator"></div>
+          <div class="line-item-row grand-total">
+            <span class="line-item-label">GRAND TOTAL:</span>
+            <span class="line-item-value" id="lineItemGrandTotal">$0.00</span>
+          </div>
+          <div class="line-item-row">
+            <span class="line-item-label">Cost Per Player:</span>
+            <span class="line-item-value" id="lineItemPerPlayer">$0.00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Export Buttons -->
+    <div class="action-buttons">
+      <button class="btn btn-primary" id="exportExcelBtn">📊 Export to Excel</button>
+      <button class="btn btn-primary" id="exportPdfBtn">📄 Export to PDF</button>
+      <button class="btn btn-primary" id="exportDocxBtn">📝 Export to Word</button>
+      <button class="btn btn-primary" id="saveTeamsBtn">💾 Save Teams</button>
+      <button class="btn btn-primary" id="downloadJsonBtn">📥 Export to File</button>
+      <button class="btn btn-primary" id="loadJsonBtn">📂 Load from File</button>
+      <input type="file" id="jsonFileInput" accept=".json" style="display: none;" />
+    </div>
+  </div>
 </body>
+
 </html>

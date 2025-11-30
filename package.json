@@ -1,0 +1,11 @@
+{
+  "name": "west-georgia-youth-sports",
+  "version": "1.0.0",
+  "description": "WGYS budget & cost web app - local dev server helper",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8000"
+  },
+  "author": "",
+  "license": "MIT"
+}

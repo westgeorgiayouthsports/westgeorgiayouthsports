@@ -20,10 +20,16 @@
         { "name": "PG: Southeast Elite Youth Championship (OPEN)", "start": "2023-06-02", "end": "2023-06-04", "fee": 725 },
         { "name": "PG: Southeast World Series #2 (MINOR)", "start": "2023-06-09", "end": "2023-06-11", "fee": 725 }
       ],
+      "uniforms": [
+        { "item": "Jersey", "cost": 50 },
+        { "item": "Pants", "cost": 50 },
+        { "item": "Hat", "cost": 14 },
+        { "item": "Belt", "cost": 5 },
+        { "item": "Socks", "cost": 5 }
+      ],
       "equipment": [
         { "item": "Practice & Game Baseballs", "cost": 500 },
-        { "item": "Practice Jerseys (2) & Hats (screen print & embroidered logos/numbers)", "cost": 900 },
-        { "item": "Game Uniforms", "cost": 4000 }
+        { "item": "Practice Jerseys (2) & Hats (screen print & embroidered logos/numbers)", "cost": 900 }
       ],
       "insurance": [
         { "item": "Team Insurance", "cost": 140 },
@@ -40,10 +46,107 @@
       "sport": "Softball",
       "season": 2026,
       "rosterSize": 14,
-      "tournaments": [ ],
-      "equipment": [ ],
-      "insurance": [ ],
-      "training": [ ]
-    }    
+      "tournaments": [],
+      "equipment": [],
+      "insurance": [],
+      "training": []
+    },
+    {
+      "id": "wgys-wgys-select-softball-8u-1764459506860",
+      "name": "WGYS Select Softball 8U",
+      "sport": "Softball",
+      "season": 2026,
+      "rosterSize": 12,
+      "tournaments": [
+        {
+          "name": "Cleats & Crowns (Middle Georgia)",
+          "start": "2026-02-28",
+          "end": "2026-02-28",
+          "fee": 200
+        },
+        {
+          "name": "Diamond Dreams Classic (Middle Georgia)",
+          "start": "2026-03-14",
+          "end": "2026-03-14",
+          "fee": 200
+        },
+        {
+          "name": "Fastpitch Frenzy (Middle Georgia)",
+          "start": "2026-03-28",
+          "end": "2026-03-28",
+          "fee": 200
+        },
+        {
+          "name": "Home Run Honeyz (Middle Georgia)",
+          "start": "2026-04-18",
+          "end": "2026-04-18",
+          "fee": 200
+        },
+        {
+          "name": "Pitch Perfect Showdown (Middle Georgia)",
+          "start": "2026-05-02",
+          "end": "2026-05-02",
+          "fee": 200
+        },
+        {
+          "name": "Sluggers & Sparkles (Middle Georgia)",
+          "start": "2026-05-16",
+          "end": "2026-05-16",
+          "fee": 200
+        },
+        {
+          "name": "Swing Into Spring (Middle Georgia)",
+          "start": "2026-05-30",
+          "end": "2026-05-30",
+          "fee": 200
+        },
+        {
+          "name": "World Series (Middle Georgia)",
+          "start": "2026-06-06",
+          "end": "2026-06-06",
+          "fee": 200
+        }
+      ],
+      "equipment": [],
+      "uniforms": [
+        {
+          "item": "Pants",
+          "cost": 50
+        },
+        {
+          "item": "Jersey",
+          "cost": 35
+        },
+        {
+          "item": "Jersey",
+          "cost": 35
+        },
+        {
+          "item": "Visor",
+          "cost": 15
+        },
+        {
+          "item": "Belt",
+          "cost": 10
+        },
+        {
+          "item": "Socks",
+          "cost": 10
+        }
+      ],
+      "insurance": [],
+      "training": []
+    },
+    {
+      "id": "wgys-select-baseball-12u-2026",
+      "name": "WGYS Select Baseball 12U",
+      "sport": "Baseball",
+      "season": 2026,
+      "rosterSize": 12,
+      "tournaments": [],
+      "equipment": [],
+      "insurance": [],
+      "training": []
+    }
   ]
 }

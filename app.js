@@ -1,3 +1,6 @@
+
+import { initFirebase, onAuthChange, fetchTeamsFromFirebase, saveTeamsToFirebase, signOutUser } from './firebase.js';
+
 let TEAM_BUDGETS_DATA = {
   "teams": [
     {
@@ -44,13 +47,110 @@ let TEAM_BUDGETS_DATA = {
       "id": "wgys-select-softball-14u-2026",
       "name": "WGYS Select Softball 14U",
       "sport": "Softball",
-      "season": 2024,
+      "season": 2026,
       "rosterSize": 14,
       "tournaments": [],
       "equipment": [],
       "insurance": [],
       "training": []
-    }
+    },
+    {
+      "id": "wgys-wgys-select-softball-8u-1764459506860",
+      "name": "WGYS Select Softball 8U",
+      "sport": "Softball",
+      "season": 2026,
+      "rosterSize": 12,
+      "tournaments": [
+        {
+          "name": "Cleats & Crowns (Middle Georgia)",
+          "start": "2026-02-28",
+          "end": "2026-02-28",
+          "fee": 200
+        },
+        {
+          "name": "Diamond Dreams Classic (Middle Georgia)",
+          "start": "2026-03-14",
+          "end": "2026-03-14",
+          "fee": 200
+        },
+        {
+          "name": "Fastpitch Frenzy (Middle Georgia)",
+          "start": "2026-03-28",
+          "end": "2026-03-28",
+          "fee": 200
+        },
+        {
+          "name": "Home Run Honeyz (Middle Georgia)",
+          "start": "2026-04-18",
+          "end": "2026-04-18",
+          "fee": 200
+        },
+        {
+          "name": "Pitch Perfect Showdown (Middle Georgia)",
+          "start": "2026-05-02",
+          "end": "2026-05-02",
+          "fee": 200
+        },
+        {
+          "name": "Sluggers & Sparkles (Middle Georgia)",
+          "start": "2026-05-16",
+          "end": "2026-05-16",
+          "fee": 200
+        },
+        {
+          "name": "Swing Into Spring (Middle Georgia)",
+          "start": "2026-05-30",
+          "end": "2026-05-30",
+          "fee": 200
+        },
+        {
+          "name": "World Series (Middle Georgia)",
+          "start": "2026-06-06",
+          "end": "2026-06-06",
+          "fee": 200
+        }
+      ],
+      "equipment": [],
+      "uniforms": [
+        {
+          "item": "Pants",
+          "cost": 50
+        },
+        {
+          "item": "Jersey",
+          "cost": 35
+        },
+        {
+          "item": "Jersey",
+          "cost": 35
+        },
+        {
+          "item": "Visor",
+          "cost": 15
+        },
+        {
+          "item": "Belt",
+          "cost": 10
+        },
+        {
+          "item": "Socks",
+          "cost": 10
+        }
+      ],
+      "insurance": [],
+      "training": []
+    },
+    {
+      "id": "wgys-select-baseball-12u-2026",
+      "name": "WGYS Select Baseball 12U",
+      "sport": "Baseball",
+      "season": 2026,
+      "rosterSize": 12,
+      "tournaments": [],
+      "equipment": [],
+      "insurance": [],
+      "training": []
+    },
   ]
 };
 
@@ -63,6 +163,8 @@ if (savedTeamData) {
     console.error('Failed to load saved team data:', e);
   }
 }
+
+// Firebase helpers are provided by `firebase.js` (modular SDK). Imported above.
 
 const DEFAULT_TOURNAMENTS = [
   { name: "17BB: Beat the Freeze", start: "2023-02-25", end: "2023-02-26", fee: 450 },
@@ -109,8 +211,54 @@ function getTodayDate() {
   return `${year}-${month}-${day}`;
 }
 
-function initializeApp() {
+async function initializeApp() {
   const currentYear = new Date().getFullYear();
+
+  // Initialize Firebase (ensures SDK ready). We don't need the return value here.
+  initFirebase();
+
+  // Require user to be authenticated. If not, redirect to `signin.html`.
+  onAuthChange(async (user) => {
+    if (!user) {
+      // Not signed in — redirect to sign-in page for auth
+      console.info('User not authenticated; redirecting to signin.html');
+      window.location.href = 'signin.html';
+      return;
+    }
+
+    // User is signed in — try to load team data from Firebase and persist locally.
+    try {
+      const fbData = await fetchTeamsFromFirebase();
+      if (fbData && typeof fbData === 'object' && fbData.teams) {
+        TEAM_BUDGETS_DATA = fbData;
+        try { localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA)); } catch (err) { console.warn('Failed to write localStorage', err); }
+        console.info('Loaded team data from Firebase.');
+      } else {
+        console.info('No team data found in Firebase; using local/default data.');
+      }
+    } catch (err) {
+      console.warn('Error loading from Firebase; using local/default data.', err);
+    }
+
+    // Continue with app initialization now that we have auth + data
+    renderAll();
+
+    // Load first team by default if any teams exist
+    if (TEAM_BUDGETS_DATA.teams.length > 0) {
+      const firstTeam = TEAM_BUDGETS_DATA.teams[0];
+      loadTeamData(firstTeam.id);
+      document.getElementById('teamLoader').value = firstTeam.id;
+    } else {
+      const teamName = document.getElementById('teamName').value;
+      if (teamName && TEAM_BUDGETS_DATA.teams.length > 0) {
+        const matchingTeam = TEAM_BUDGETS_DATA.teams.find(t => t.name === teamName);
+        if (matchingTeam) {
+          currentlyLoadedTeamId = matchingTeam.id;
+          document.getElementById('teamLoader').value = matchingTeam.id;
+        }
+      }
+    }
+  });
   document.getElementById('season').value = currentYear;
 
   // Theme toggle listeners
@@ -158,8 +306,18 @@ function initializeApp() {
   if (document.getElementById('saveTeamsBtn')) {
     document.getElementById('saveTeamsBtn').addEventListener('click', function () {
       saveCurrentTeam();
-      saveTeamsToFile();
+      saveTeamsToStore();
     });
+  }
+
+  // Download JSON Listener
+  if (document.getElementById('downloadJsonBtn')) {
+    document.getElementById('downloadJsonBtn').addEventListener('click', downloadTeamsJSON);
+  }
+
+  // Load JSON Listener
+  if (document.getElementById('loadJsonBtn')) {
+    document.getElementById('loadJsonBtn').addEventListener('click', loadTeamsJSON);
   }
 
   // Team Loader Listener
@@ -204,24 +362,10 @@ function initializeApp() {
   const savedTheme = localStorage.getItem('theme') || 'dark';
   setTheme(savedTheme);
 
-  renderAll();
+  // Event delegation: handle all dynamic input changes and button clicks
+  setupEventDelegation();
 
-  // Load first team by default if any teams exist
-  if (TEAM_BUDGETS_DATA.teams.length > 0) {
-    const firstTeam = TEAM_BUDGETS_DATA.teams[0];
-    loadTeamData(firstTeam.id);
-    document.getElementById('teamLoader').value = firstTeam.id;
-  } else {
-    // Sync the dropdown with the currently loaded team (if any)
-    const teamName = document.getElementById('teamName').value;
-    if (teamName && TEAM_BUDGETS_DATA.teams.length > 0) {
-      const matchingTeam = TEAM_BUDGETS_DATA.teams.find(t => t.name === teamName);
-      if (matchingTeam) {
-        currentlyLoadedTeamId = matchingTeam.id;
-        document.getElementById('teamLoader').value = matchingTeam.id;
-      }
-    }
-  }
+  // `renderAll` and default team loading are handled after auth state is confirmed
 }
 
 function setTheme(theme) {
@@ -358,16 +502,77 @@ function deleteTeam() {
     training = [];
     renderAll();
 
-    // Save to file
-    saveTeamsToFile();
+    // Save teams.
+    saveTeamsToStore();
   }
 }
 
-function saveTeamsToFile() {
-  // Save to localStorage to persist team data
-  localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+function showToast(message, type = 'success', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
 
-  // Also offer to download as JSON file for backup/manual saving to repo
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+
+  // Styling
+  Object.assign(toast.style, {
+    padding: '12px 20px',
+    marginBottom: '10px',
+    borderRadius: '6px',
+    fontSize: '14px',
+    fontWeight: '500',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    minWidth: '300px',
+    maxWidth: '500px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    animation: 'slideIn 0.3s ease-out',
+  });
+
+  // Color by type
+  const colors = {
+    success: { bg: '#10b981', text: '#fff' },
+    error: { bg: '#ef4444', text: '#fff' },
+    warning: { bg: '#f59e0b', text: '#fff' },
+    info: { bg: '#3b82f6', text: '#fff' },
+  };
+
+  const color = colors[type] || colors.info;
+  toast.style.backgroundColor = color.bg;
+  toast.style.color = color.text;
+
+  container.appendChild(toast);
+
+  // Auto-remove after duration
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease-out';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+async function saveTeamsToStore() {
+  // Save to localStorage to persist team data
+  try {
+    localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+  } catch (err) {
+    console.warn('Failed to write TEAM_BUDGETS_DATA to localStorage:', err);
+    showToast('Failed to save locally', 'error');
+    return;
+  }
+
+  // Save to Firebase only
+  try {
+    await saveTeamsToFirebase(TEAM_BUDGETS_DATA);
+    showToast('Team data saved locally and synced to Firebase server ✓', 'success', 4000);
+  } catch (err) {
+    console.warn('Failed to save to Firebase:', err);
+    showToast('Team data saved locally (Firebase sync failed)', 'warning', 4000);
+  }
+}
+
+function downloadTeamsJSON() {
   const jsonData = JSON.stringify(TEAM_BUDGETS_DATA, null, 2);
   const blob = new Blob([jsonData], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -380,8 +585,58 @@ function saveTeamsToFile() {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 
-  alert('Team data saved locally. JSON file downloaded for backup.');
+  showToast('Team budget JSON downloaded ✓', 'success', 3000);
 }
+
+function loadTeamsJSON() {
+  const fileInput = document.getElementById('jsonFileInput');
+  fileInput.click();
+}
+
+// Handle file selection
+document.getElementById('jsonFileInput').addEventListener('change', function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    try {
+      const data = JSON.parse(event.target.result);
+
+      // Validate the structure
+      if (!data.teams || !Array.isArray(data.teams)) {
+        showToast('Invalid JSON format: missing teams array', 'error');
+        return;
+      }
+
+      // Replace current data
+      TEAM_BUDGETS_DATA = data;
+
+      // Save to localStorage
+      localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+
+      // Refresh UI
+      populateTeamLoader();
+      renderAll();
+
+      // Load first team
+      if (TEAM_BUDGETS_DATA.teams.length > 0) {
+        loadTeamData(TEAM_BUDGETS_DATA.teams[0].id);
+        document.getElementById('teamLoader').value = TEAM_BUDGETS_DATA.teams[0].id;
+      }
+
+      showToast(`Loaded ${TEAM_BUDGETS_DATA.teams.length} teams from JSON ✓`, 'success', 4000);
+    } catch (err) {
+      console.error('Failed to parse JSON:', err);
+      showToast('Failed to load JSON file: invalid format', 'error');
+    }
+  };
+
+  reader.readAsText(file);
+
+  // Reset input so the same file can be selected again
+  e.target.value = '';
+});
 
 function createNewTeam() {
   const teamName = prompt('Enter new team name:');
@@ -434,20 +689,382 @@ function createNewTeam() {
   // Save to localStorage
   localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
 
-  // Save to file
-  saveTeamsToFile();
+  // Save teams
+  saveTeamsToStore();
+}
+
+function setupEventDelegation() {
+  // Tournament events
+  const tournamentsBody = document.getElementById('tournamentsBody');
+  if (tournamentsBody) {
+    tournamentsBody.addEventListener('change', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const idx = parseInt(row.dataset.index);
+
+      if (e.target.classList.contains('tournament-name')) {
+        tournaments[idx].name = e.target.value;
+      }
+      if (e.target.classList.contains('tournament-start')) {
+        tournaments[idx].start = e.target.value;
+        if (!tournaments[idx].end && tournaments[idx].start) {
+          tournaments[idx].end = tournaments[idx].start;
+        }
+      }
+      if (e.target.classList.contains('tournament-end')) {
+        tournaments[idx].end = e.target.value;
+      }
+      if (e.target.classList.contains('fee-input')) {
+        tournaments[idx].fee = parseFloat(e.target.value) || 0;
+
+        // Update and show the display
+        const feeDisplay = e.target.previousElementSibling;
+        if (feeDisplay && feeDisplay.classList.contains('fee-display')) {
+          feeDisplay.textContent = formatCurrency(tournaments[idx].fee);
+          feeDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+
+      // Save immediately
+      saveCurrentTeam();
+      localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+      updateAll();
+    });
+
+    tournamentsBody.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('fee-input')) {
+        const feeDisplay = e.target.previousElementSibling;
+        if (feeDisplay && feeDisplay.classList.contains('fee-display')) {
+          feeDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+    }, true);
+    tournamentsBody.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('fee-input')) {
+        e.target.style.display = 'none';
+        e.target.previousElementSibling.style.display = 'inline';
+      }
+    }, true);
+    tournamentsBody.addEventListener('keydown', (e) => {
+      if (e.target.classList.contains('fee-input')) {
+        if (e.key === 'Enter' || e.key === 'Tab') {
+          const idx = parseInt(e.target.closest('tr').dataset.index);
+          tournaments[idx].fee = parseFloat(e.target.value) || 0;
+          updateAll();
+          e.target.style.display = 'none';
+          e.target.previousElementSibling.style.display = 'inline';
+          if (e.key === 'Tab') e.preventDefault();
+        }
+      }
+    });
+    tournamentsBody.addEventListener('click', (e) => {
+      if (e.target.classList.contains('fee-display')) {
+        e.target.style.display = 'none';
+        const input = e.target.nextElementSibling;
+        input.style.display = 'inline';
+        input.focus();
+        input.select();
+      }
+      if (e.target.classList.contains('btn-remove-tournament')) {
+        const idx = parseInt(e.target.dataset.index);
+        removeTournament(idx);
+      }
+    });
+  }
+
+  // Equipment events
+  const equipmentBody = document.getElementById('equipmentBody');
+  if (equipmentBody) {
+    equipmentBody.addEventListener('change', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const idx = parseInt(row.dataset.index);
+
+      if (e.target.classList.contains('equipment-item')) {
+        equipment[idx].item = e.target.value;
+      }
+      if (e.target.classList.contains('cost-input')) {
+        equipment[idx].cost = parseFloat(e.target.value) || 0;
+
+        // Update and show the display
+        const costDisplay = e.target.previousElementSibling;
+        if (costDisplay && costDisplay.classList.contains('cost-display')) {
+          costDisplay.textContent = formatCurrency(equipment[idx].cost);
+          costDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+
+      // Save immediately
+      saveCurrentTeam();
+      localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+      updateAll();
+    });
+
+    equipmentBody.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('cost-input')) {
+        const costDisplay = e.target.previousElementSibling;
+        if (costDisplay && costDisplay.classList.contains('cost-display')) {
+          costDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+    }, true);
+    equipmentBody.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('cost-input')) {
+        e.target.style.display = 'none';
+        e.target.previousElementSibling.style.display = 'inline';
+      }
+    }, true);
+    equipmentBody.addEventListener('keydown', (e) => {
+      if (e.target.classList.contains('cost-input')) {
+        if (e.key === 'Enter' || e.key === 'Tab') {
+          const idx = parseInt(e.target.closest('tr').dataset.index);
+          equipment[idx].cost = parseFloat(e.target.value) || 0;
+          saveCurrentTeam();
+          localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));  // ← ADD THIS LINE
+          updateAll();
+          e.target.style.display = 'none';
+          e.target.previousElementSibling.style.display = 'inline';
+          if (e.key === 'Tab') e.preventDefault();
+        }
+      }
+    });
+    equipmentBody.addEventListener('click', (e) => {
+      if (e.target.classList.contains('cost-display')) {
+        e.target.style.display = 'none';
+        const input = e.target.nextElementSibling;
+        input.style.display = 'inline';
+        input.focus();
+        input.select();
+      }
+      if (e.target.classList.contains('btn-remove-equipment')) {
+        const idx = parseInt(e.target.dataset.index);
+        removeEquipmentItem(idx);
+      }
+    });
+  }
+
+  // Uniforms events
+  const uniformsBody = document.getElementById('uniformsBody');
+  if (uniformsBody) {
+    uniformsBody.addEventListener('change', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const idx = parseInt(row.dataset.index);
+
+      if (e.target.classList.contains('uniform-item')) {
+        uniforms[idx].item = e.target.value;
+      }
+      if (e.target.classList.contains('uniform-cost')) {
+        uniforms[idx].cost = parseFloat(e.target.value) || 0;
+
+        // Update and show the display
+        const costDisplay = e.target.previousElementSibling;
+        if (costDisplay && costDisplay.classList.contains('cost-display')) {
+          costDisplay.textContent = formatCurrency(uniforms[idx].cost);
+          costDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+
+      // Save immediately
+      saveCurrentTeam();
+      localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+      updateAll();  // ← THIS MUST BE HERE - it re-renders uniforms with updated total cost
+    });
+
+    uniformsBody.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('uniform-cost')) {
+        const costDisplay = e.target.previousElementSibling;
+        if (costDisplay && costDisplay.classList.contains('cost-display')) {
+          costDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+    }, true);
+
+    uniformsBody.addEventListener('click', (e) => {
+      if (e.target.classList.contains('cost-display')) {
+        e.target.style.display = 'none';
+        const input = e.target.nextElementSibling;
+        if (input && input.classList.contains('uniform-cost')) {
+          input.style.display = 'inline';
+          input.focus();
+          input.select();
+        }
+      }
+
+      if (e.target.classList.contains('btn-remove-uniform')) {
+        const idx = parseInt(e.target.dataset.index);
+        removeUniformItem(idx);
+      }
+    });
+  }
+
+  // Insurance events
+  const insuranceBody = document.getElementById('insuranceBody');
+  if (insuranceBody) {
+    insuranceBody.addEventListener('change', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const idx = parseInt(row.dataset.index);
+
+      if (e.target.classList.contains('insurance-item')) {
+        insurance[idx].item = e.target.value;
+      }
+      if (e.target.classList.contains('cost-input')) {
+        insurance[idx].cost = parseFloat(e.target.value) || 0;
+
+        // Update and show the display
+        const costDisplay = e.target.previousElementSibling;
+        if (costDisplay && costDisplay.classList.contains('cost-display')) {
+          costDisplay.textContent = formatCurrency(insurance[idx].cost);
+          costDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+
+      // Save immediately
+      saveCurrentTeam();
+      localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+      updateAll();
+    });
+
+    insuranceBody.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('cost-input')) {
+        const costDisplay = e.target.previousElementSibling;
+        if (costDisplay && costDisplay.classList.contains('cost-display')) {
+          costDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+    }, true);
+    insuranceBody.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('cost-input')) {
+        e.target.style.display = 'none';
+        e.target.previousElementSibling.style.display = 'inline';
+      }
+    }, true);
+    insuranceBody.addEventListener('keydown', (e) => {
+      if (e.target.classList.contains('cost-input')) {
+        if (e.key === 'Enter' || e.key === 'Tab') {
+          const idx = parseInt(e.target.closest('tr').dataset.index);
+          insurance[idx].cost = parseFloat(e.target.value) || 0;
+          saveCurrentTeam();
+          localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));  // ← ADD THIS LINE
+          updateAll();
+          e.target.style.display = 'none';
+          e.target.previousElementSibling.style.display = 'inline';
+          if (e.key === 'Tab') e.preventDefault();
+        }
+      }
+    });
+
+    insuranceBody.addEventListener('click', (e) => {
+      if (e.target.classList.contains('cost-display')) {
+        e.target.style.display = 'none';
+        const input = e.target.nextElementSibling;
+        input.style.display = 'inline';
+        input.focus();
+        input.select();
+      }
+      if (e.target.classList.contains('btn-remove-insurance')) {
+        const idx = parseInt(e.target.dataset.index);
+        removeInsuranceItem(idx);
+      }
+    });
+  }
+
+  // Training events
+  const trainingBody = document.getElementById('trainingBody');
+  if (trainingBody) {
+    trainingBody.addEventListener('change', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const idx = parseInt(row.dataset.index);
+
+      if (e.target.classList.contains('training-item')) {
+        training[idx].item = e.target.value;
+      }
+      if (e.target.classList.contains('cost-input')) {
+        training[idx].cost = parseFloat(e.target.value) || 0;
+
+        // Update and show the display
+        const costDisplay = e.target.previousElementSibling;
+        if (costDisplay && costDisplay.classList.contains('cost-display')) {
+          costDisplay.textContent = formatCurrency(training[idx].cost);
+          costDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+
+      // Save immediately
+      saveCurrentTeam();
+      localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+      updateAll();
+    });
+
+    trainingBody.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('cost-input')) {
+        const costDisplay = e.target.previousElementSibling;
+        if (costDisplay && costDisplay.classList.contains('cost-display')) {
+          costDisplay.style.display = 'inline';
+          e.target.style.display = 'none';
+        }
+      }
+    }, true);
+    trainingBody.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('cost-input')) {
+        e.target.style.display = 'none';
+        e.target.previousElementSibling.style.display = 'inline';
+      }
+    }, true);
+    trainingBody.addEventListener('keydown', (e) => {
+      if (e.target.classList.contains('cost-input')) {
+        if (e.key === 'Enter' || e.key === 'Tab') {
+          const idx = parseInt(e.target.closest('tr').dataset.index);
+          training[idx].cost = parseFloat(e.target.value) || 0;
+          saveCurrentTeam();
+          localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+          updateAll();
+          e.target.style.display = 'none';
+          e.target.previousElementSibling.style.display = 'inline';
+          if (e.key === 'Tab') e.preventDefault();
+        }
+      }
+    });
+    trainingBody.addEventListener('click', (e) => {
+      if (e.target.classList.contains('cost-display')) {
+        e.target.style.display = 'none';
+        const input = e.target.nextElementSibling;
+        input.style.display = 'inline';
+        input.focus();
+        input.select();
+      }
+      if (e.target.classList.contains('btn-remove-training')) {
+        const idx = parseInt(e.target.dataset.index);
+        removeTrainingItem(idx);
+      }
+    });
+  }
 }
 
 function renderTournaments() {
   const body = document.getElementById('tournamentsBody');
   body.innerHTML = tournaments.map((t, i) => `
-        <tr>
+        <tr data-index="${i}">
             <td>${i + 1}.</td>
-            <td><input type="text" value="${t.name}" onchange="tournaments[${i}].name = this.value; updateAll();"></td>
-            <td><input type="date" value="${t.start}" onchange="tournaments[${i}].start = this.value; updateAll();" onblur="if(!tournaments[${i}].end && tournaments[${i}].start) { tournaments[${i}].end = tournaments[${i}].start; renderTournaments(); }"></td>
-            <td><input type="date" value="${t.end}" onchange="tournaments[${i}].end = this.value; updateAll();"></td>
-            <td><input type="number" value="${t.fee}" min="0" step="0.01" onchange="tournaments[${i}].fee = parseFloat(this.value) || 0; updateAll();"></td>
-            <td><button class="btn btn-secondary btn-sm" onclick="removeTournament(${i})">Remove</button></td>
+            <td><input type="text" class="tournament-name" value="${t.name}"></td>
+            <td><input type="date" class="tournament-start" value="${t.start}"></td>
+            <td><input type="date" class="tournament-end" value="${t.end}"></td>
+            <td>
+              <span class="fee-display" style="cursor:pointer;color:var(--color-primary);font-weight:500" data-index="${i}">${formatCurrency(t.fee || 0)}</span>
+              <input type="number" class="fee-input" value="${t.fee}" min="0" step="0.01" placeholder="0.00" style="display:none;width:90px" data-index="${i}" />
+            </td>
+            <td><button class="btn btn-secondary btn-sm btn-remove-tournament" data-index="${i}">Remove</button></td>
         </tr>
     `).join('');
   updateAll();
@@ -456,39 +1073,48 @@ function renderTournaments() {
 function renderEquipment() {
   const body = document.getElementById('equipmentBody');
   body.innerHTML = equipment.map((e, i) => `
-        <tr>
-            <td><input type="text" value="${e.item}" onchange="equipment[${i}].item = this.value; updateAll();"></td>
-            <td><input type="number" value="${e.cost}" min="0" step="0.01" onchange="equipment[${i}].cost = parseFloat(this.value) || 0; updateAll();"></td>
-            <td><button class="btn btn-secondary btn-sm" onclick="removeEquipmentItem(${i})">Remove</button></td>
+        <tr data-index="${i}">
+            <td><input type="text" class="equipment-item" value="${e.item}"></td>
+            <td>
+              <span class="cost-display" style="cursor:pointer;color:var(--color-primary);font-weight:500" data-index="${i}">${formatCurrency(e.cost || 0)}</span>
+              <input type="number" class="cost-input" value="${e.cost}" min="0" step="0.01" placeholder="0.00" style="display:none;width:90px" data-index="${i}" />
+            </td>
+            <td><button class="btn btn-secondary btn-sm btn-remove-equipment" data-index="${i}">Remove</button></td>
         </tr>
     `).join('');
   updateAll();
 }
 
 function renderUniforms() {
-  const rosterSize = parseFloat(document.getElementById('roster').value) || 1;
   const body = document.getElementById('uniformsBody');
+  const rosterSize = parseInt(document.getElementById('roster').value) || 1;
+
   body.innerHTML = uniforms.map((u, i) => {
     const totalCost = (parseFloat(u.cost) || 0) * rosterSize;
     return `
-        <tr>
-            <td><input type="text" value="${u.item}" onchange="uniforms[${i}].item = this.value; updateAll();"></td>
-            <td><input type="number" value="${u.cost}" min="0" step="0.01" onchange="uniforms[${i}].cost = parseFloat(this.value) || 0; updateAll();"></td>
-            <td>${formatCurrency(totalCost)}</td>
-            <td><button class="btn btn-secondary btn-sm" onclick="removeUniformItem(${i})">Remove</button></td>
-        </tr>
+      <tr data-index="${i}">
+        <td><input type="text" class="uniform-item" value="${u.item}" /></td>
+        <td>
+          <span class="cost-display" style="display: inline; color: #00d4ff;">${formatCurrency(u.cost)}</span>
+          <input type="number" class="uniform-cost" value="${u.cost}" style="display: none;" step="0.01" min="0" />
+        </td>
+        <td>${formatCurrency(totalCost)}</td>
+        <td><button class="btn-remove-uniform" data-index="${i}">Remove</button></td>
+      </tr>
     `;
   }).join('');
-  updateAll();
 }
 
 function renderInsurance() {
   const body = document.getElementById('insuranceBody');
   body.innerHTML = insurance.map((i, idx) => `
-        <tr>
-            <td><input type="text" value="${i.item}" onchange="insurance[${idx}].item = this.value; updateAll();"></td>
-            <td><input type="number" value="${i.cost}" min="0" step="0.01" onchange="insurance[${idx}].cost = parseFloat(this.value) || 0; updateAll();"></td>
-            <td><button class="btn btn-secondary btn-sm" onclick="removeInsuranceItem(${idx})">Remove</button></td>
+        <tr data-index="${idx}">
+            <td><input type="text" class="insurance-item" value="${i.item}"></td>
+            <td>
+              <span class="cost-display" style="cursor:pointer;color:var(--color-primary);font-weight:500" data-index="${idx}">${formatCurrency(i.cost || 0)}</span>
+              <input type="number" class="cost-input" value="${i.cost}" min="0" step="0.01" placeholder="0.00" style="display:none;width:90px" data-index="${idx}" />
+            </td>
+            <td><button class="btn btn-secondary btn-sm btn-remove-insurance" data-index="${idx}">Remove</button></td>
         </tr>
     `).join('');
   updateAll();
@@ -497,10 +1123,13 @@ function renderInsurance() {
 function renderTraining() {
   const body = document.getElementById('trainingBody');
   body.innerHTML = training.map((t, i) => `
-        <tr>
-            <td><input type="text" value="${t.item}" onchange="training[${i}].item = this.value; updateAll();"></td>
-            <td><input type="number" value="${t.cost}" min="0" step="0.01" onchange="training[${i}].cost = parseFloat(this.value) || 0; updateAll();"></td>
-            <td><button class="btn btn-secondary btn-sm" onclick="removeTrainingItem(${i})">Remove</button></td>
+        <tr data-index="${i}">
+            <td><input type="text" class="training-item" value="${t.item}"></td>
+            <td>
+              <span class="cost-display" style="cursor:pointer;color:var(--color-primary);font-weight:500" data-index="${i}">${formatCurrency(t.cost || 0)}</span>
+              <input type="number" class="cost-input" value="${t.cost}" min="0" step="0.01" placeholder="0.00" style="display:none;width:90px" data-index="${i}" />
+            </td>
+            <td><button class="btn btn-secondary btn-sm btn-remove-training" data-index="${i}">Remove</button></td>
         </tr>
     `).join('');
   updateAll();
@@ -548,6 +1177,7 @@ function updateAll() {
   document.getElementById('lineItemTraining').textContent = formatCurrency(trainingTotal);
   document.getElementById('lineItemGrandTotal').textContent = formatCurrency(grandTotal);
   document.getElementById('lineItemPerPlayer').textContent = formatCurrency(perPlayer);
+  renderUniforms(); // Re-render uniforms to update total costs per item
 }
 
 function renderAll() {
@@ -686,7 +1316,7 @@ function exportToExcel() {
   const grandTotal = tournamentTotal + operationsTotal;
   const perPlayer = grandTotal / (parseFloat(rosterSize) || 1);
 
-  let csvContent = `WGYS ${sport} - Budget & Pricing Template\n`;
+  let csvContent = `WGYS Select ${sport} - Budget & Cost\n`;
   csvContent += `Team: ${teamName}\nSeason: ${season}\nRoster Size: ${rosterSize}\n\n`;
 
   csvContent += `TOURNAMENT COSTS\nTournament Name,Start Date,End Date,Entry Fee\n`;
@@ -700,7 +1330,7 @@ function exportToExcel() {
     const total = (parseFloat(u.cost) || 0) * (parseFloat(rosterSize) || 1);
     csvContent += `"${u.item}",${u.cost},${total}\n`;
   });
-  csvContent += `Total Uniform Costs,,${uniformsTotal}\n\n`;
+  csvContent += `Total Uniform Costs,${uniformsTotal / rosterSize},${uniformsTotal}\n\n`;
 
   csvContent += `EQUIPMENT\nItem,Cost\n`;
   equipment.forEach(e => {
@@ -722,8 +1352,8 @@ function exportToExcel() {
 
   csvContent += `SUMMARY\nCategory,Amount\n`;
   csvContent += `Tournament Costs,${tournamentTotal}\n`;
-  csvContent += `Equipment Costs,${equipmentTotal}\n`;
   csvContent += `Uniform Costs,${uniformsTotal}\n`;
+  csvContent += `Equipment Costs,${equipmentTotal}\n`;
   csvContent += `Insurance & Memberships,${insuranceTotal}\n`;
   csvContent += `Training Costs,${trainingTotal}\n`;
   csvContent += `Grand Total,${grandTotal}\n`;
@@ -767,7 +1397,7 @@ function exportToPDF() {
   // Title
   doc.setFontSize(18);
   doc.setTextColor(32, 128, 133);
-  doc.text(`WGYS ${sport} - Budget & Pricing Template`, margin, yPosition);
+  doc.text(`WGYS Select ${sport} - Budget & Cost`, margin, yPosition);
   yPosition += 12;
 
   // Team Info
@@ -808,7 +1438,7 @@ function exportToPDF() {
   yPosition += 8;
 
   const uniformsData = uniforms.map(u => [u.item, formatCurrency(u.cost), formatCurrency((parseFloat(u.cost) || 0) * (parseFloat(rosterSize) || 1))]);
-  uniformsData.push(['Total Uniform Costs', '', formatCurrency(uniformsTotal)]);
+  uniformsData.push(['Total Uniform Costs', formatCurrency(uniformsTotal / rosterSize), formatCurrency(uniformsTotal)]);
 
   doc.autoTable({
     startY: yPosition,
@@ -899,6 +1529,7 @@ function exportToPDF() {
 
   const summaryData = [
     ['Tournament Costs:', formatCurrency(tournamentTotal)],
+    ['Uniform Costs:', formatCurrency(uniformsTotal)],
     ['Equipment Costs:', formatCurrency(equipmentTotal)],
     ['Insurance & Memberships:', formatCurrency(insuranceTotal)],
     ['Training Costs:', formatCurrency(trainingTotal)],
@@ -945,7 +1576,7 @@ function exportToDOCX() {
     <meta charset="UTF-8">
     <title>WGYS Budget - ${teamName}</title>
     <style>
-        body { font-family: Calibri, sans-serif; margin: 0.5in; }
+        body { font-family: Calibri, sans-serif; margin: 0; padding: 0; margin-left: 0; margin-right: 0; }
         h1 { font-size: 28pt; color: #208085; margin: 12pt 0; }
         h2 { font-size: 14pt; color: #208085; margin: 12pt 0 6pt 0; border-bottom: 2pt solid #208085; padding-bottom: 6pt; }
         p { margin: 6pt 0; font-size: 11pt; }
@@ -957,7 +1588,7 @@ function exportToDOCX() {
     </style>
 </head>
 <body>
-<h1>WGYS ${sport} - Budget &amp; Pricing Template</h1>
+<h1>WGYS ${sport} - Budget &amp; Cost</h1>
 
 <p><strong>Team:</strong> ${teamName}</p>
 <p><strong>Season:</strong> ${season}</p>
@@ -1001,7 +1632,7 @@ function exportToDOCX() {
   `).join('')}
   <tr class="total-row">
     <td>Total Uniform Costs</td>
-    <td></td>
+    <td>${formatCurrency(uniformsTotal / rosterSize)}</td>
     <td>${formatCurrency(uniformsTotal)}</td>
   </tr>
 </table>
@@ -1065,6 +1696,10 @@ function exportToDOCX() {
     <tr>
         <td><strong>Tournament Costs:</strong></td>
         <td>${formatCurrency(tournamentTotal)}</td>
+    </tr>
+    <tr>
+        <td><strong>Uniform Costs:</strong></td>
+        <td>${formatCurrency(uniformsTotal)}</td>
     </tr>
     <tr>
         <td><strong>Equipment Costs:</strong></td>
