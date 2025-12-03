@@ -47,6 +47,17 @@ jobs:
           sed -i "s|FIREBASE_APP_ID_PLACEHOLDER|${FIREBASE_APP_ID}|g" config.js
           sed -i "s/FIREBASE_MEASUREMENT_ID_PLACEHOLDER/${FIREBASE_MEASUREMENT_ID}/g" config.js
 
+      - name: Verify config.js was updated
+        run: |
+          echo "Checking if placeholders were replaced..."
+          if grep -q "PLACEHOLDER" config.js; then
+            echo "❌ Placeholders still found in config.js"
+            cat config.js
+            exit 1
+          else
+            echo "✅ All placeholders replaced"
+          fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
