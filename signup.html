@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sign In - WGYS</title>
+  <title>Sign Up - WGYS</title>
   <script>
     // Apply saved theme early to avoid flash (expects 'dark' or 'light')
     try {
@@ -76,52 +76,35 @@
     }
 
     h1 {
-      margin: 0;
+      margin: 0 0 8px 0;
+      font-size: 18px;
       font-family: Impact, "Arial Black", sans-serif;
       font-weight: 900;
       letter-spacing: 1px;
-      font-size: 18px;
+    }
+
+    h2 {
+      margin: 8px 0 0 0;
+      font-size: 16px;
+      font-weight: normal;
     }
 
     .subtitle {
       color: var(--color-text-secondary);
       font-size: 14px;
-      margin-top: 8px;
-    }
-
-    .form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .form-item {
-      display: flex;
-      flex-direction: column;
     }
 
     label {
+      display: block;
+      margin-top: 8px;
       font-size: 13px;
       color: var(--color-text-secondary);
-      margin-bottom: 6px;
-    }
-
-    .input-with-icon {
-      position: relative;
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--color-text-secondary);
-      font-size: 16px;
     }
 
     input {
       width: 100%;
-      padding: 12px 12px 12px 40px;
+      padding: 8px 10px;
+      margin-top: 6px;
       border: 1px solid var(--color-border);
       border-radius: 6px;
       background: transparent;
@@ -134,41 +117,26 @@
       border-color: var(--color-primary);
     }
 
-    input:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
     }
 
     button {
       width: 100%;
-      padding: 12px;
+      padding: 10px 12px;
       border-radius: 6px;
       border: none;
       cursor: pointer;
       font-size: 14px;
       font-weight: 500;
-      transition: all 150ms ease;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
     }
 
     .primary {
       background: var(--color-primary);
       color: #fff;
-    }
-
-    .primary:hover:not(:disabled) {
-      background: #2da8b8;
-    }
-
-    .divider {
-      text-align: center;
-      margin: 16px 0;
-      color: var(--color-text-secondary);
-      font-size: 14px;
     }
 
     .google {
@@ -181,13 +149,16 @@
       gap: 8px;
     }
 
-    .google:hover:not(:disabled) {
-      background: var(--color-secondary);
+    .divider {
+      text-align: center;
+      margin: 16px 0;
+      color: var(--color-text-secondary);
+      font-size: 14px;
     }
 
     .note {
       margin-top: 24px;
-      font-size: 14px;
+      font-size: 12px;
       color: var(--color-text-secondary);
       text-align: center;
     }
@@ -220,7 +191,6 @@
       cursor: pointer;
       border-radius: 4px;
       font-size: 12px;
-      width: auto;
     }
 
     .theme-btn.active {
@@ -242,40 +212,42 @@
     <div class="header">
       <img src="https://www.westgeorgiayouthsports.org/documents/73886b1f-4ce8-4475-85f2-acd307ad29eb" alt="WGYS Logo" class="logo">
       <h1>WEST GEORGIA YOUTH SPORTS, INC.</h1>
-      <div class="subtitle">Sign in to your account</div>
+      <h2>Create Account</h2>
+      <div class="subtitle">Join West Georgia Youth Sports</div>
     </div>
 
-    <form class="form" id="signInForm">
-      <div class="form-item">
-        <div class="input-with-icon">
-          <span class="input-icon">📧</span>
-          <input id="email" type="email" placeholder="Email address" required />
-        </div>
+    <form id="signupForm">
+      <label for="displayName">Full name</label>
+      <input id="displayName" type="text" placeholder="Full name" required />
+      
+      <label for="email">Email address</label>
+      <input id="email" type="email" placeholder="Email address" required />
+      
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Password" required />
+      
+      <label for="confirmPassword">Confirm password</label>
+      <input id="confirmPassword" type="password" placeholder="Confirm password" required />
+      
+      <div class="actions">
+        <button type="submit" class="primary" id="createAccountBtn">Create Account</button>
       </div>
-
-      <div class="form-item">
-        <div class="input-with-icon">
-          <span class="input-icon">🔒</span>
-          <input id="password" type="password" placeholder="Password" required />
-        </div>
-      </div>
-
-      <button type="submit" class="primary" id="signInBtn">Sign In</button>
     </form>
 
     <div class="divider">OR</div>
 
-    <button class="google" id="googleBtn">
+    <button class="google" id="googleSignUpBtn">
       <span>📧</span>
-      Sign in with Google
+      Sign up with Google
     </button>
 
     <div class="note">
-      Don't have an account? <a href="signup.html">Sign up</a>
+      Already have an account? <a href="signin.html">Sign in</a>
     </div>
   </div>
+
   <script>
-    // Theme toggle behavior for the sign-in page (non-module script)
+    // Theme toggle behavior
     (function () {
       function setTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
@@ -310,53 +282,67 @@
   </script>
   
   <script type="module">
-    import { signInEmailPassword, signInWithGoogle, onAuthChange } from './firebase.js';
+    import { signUpWithEmail, signInWithGoogle, onAuthChange } from './firebase.js';
 
-    const form = document.getElementById('signInForm');
+    const form = document.getElementById('signupForm');
+    const displayNameEl = document.getElementById('displayName');
     const emailEl = document.getElementById('email');
-    const passEl = document.getElementById('password');
-    const signInBtn = document.getElementById('signInBtn');
-    const googleBtn = document.getElementById('googleBtn');
+    const passwordEl = document.getElementById('password');
+    const confirmPasswordEl = document.getElementById('confirmPassword');
+    const createAccountBtn = document.getElementById('createAccountBtn');
+    const googleSignUpBtn = document.getElementById('googleSignUpBtn');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
+      const displayName = displayNameEl.value.trim();
       const email = emailEl.value.trim();
-      const password = passEl.value;
-      
-      if (!email || !password) {
-        alert('Please provide email and password.');
+      const password = passwordEl.value;
+      const confirmPassword = confirmPasswordEl.value;
+
+      if (!displayName || !email || !password || !confirmPassword) {
+        alert('Please fill in all fields.');
         return;
       }
 
-      signInBtn.disabled = true;
-      signInBtn.textContent = 'Signing in...';
+      if (password !== confirmPassword) {
+        alert('Passwords do not match.');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters.');
+        return;
+      }
+
+      createAccountBtn.disabled = true;
+      createAccountBtn.textContent = 'Creating Account...';
 
       try {
-        await signInEmailPassword(email, password);
+        await signUpWithEmail(email, password, displayName);
         window.location.href = 'index.html';
       } catch (err) {
         console.error(err);
-        alert('Sign in failed: ' + (err.message || err));
+        alert('Failed to create account: ' + (err.message || err));
       } finally {
-        signInBtn.disabled = false;
-        signInBtn.textContent = 'Sign In';
+        createAccountBtn.disabled = false;
+        createAccountBtn.textContent = 'Create Account';
       }
     });
 
-    googleBtn.addEventListener('click', async () => {
-      googleBtn.disabled = true;
-      googleBtn.textContent = 'Signing in...';
+    googleSignUpBtn.addEventListener('click', async () => {
+      googleSignUpBtn.disabled = true;
+      googleSignUpBtn.textContent = 'Signing up...';
 
       try {
         await signInWithGoogle();
         window.location.href = 'index.html';
       } catch (err) {
         console.error(err);
-        alert('Google sign-in failed: ' + (err.message || err));
+        alert('Failed to sign up with Google: ' + (err.message || err));
       } finally {
-        googleBtn.disabled = false;
-        googleBtn.innerHTML = '<span>📧</span>Sign in with Google';
+        googleSignUpBtn.disabled = false;
+        googleSignUpBtn.textContent = 'Sign up with Google';
       }
     });
 
