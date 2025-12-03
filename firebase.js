@@ -1,79 +1,80 @@
-// Firebase initialization and helpers (modular SDK via ESM)
-// This file is an ES module and is intended to be imported with `type="module"` in the browser.
+// Firebase configuration and initialization
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  GoogleAuthProvider,
-  signInWithPopup,
-  onAuthStateChanged
-} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
-import {
-  getDatabase,
-  ref,
-  get,
-  set
-} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js';
-
+// Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyDwydE5BFNWY99KAAlltP8ph30UTLT6Fpk",
-  authDomain: "wgys-ls.firebaseapp.com",
-  databaseURL: "https://wgys-ls-default-rtdb.firebaseio.com",
-  projectId: "wgys-ls",
-  storageBucket: "wgys-ls.firebasestorage.app",
-  messagingSenderId: "115058670356",
-  appId: "1:115058670356:web:f4e216241b8b534b74e001",
-  measurementId: "G-CK303BGJZG"
+  apiKey: window.FIREBASE_CONFIG?.apiKey,
+  authDomain: window.FIREBASE_CONFIG?.authDomain,
+  databaseURL: window.FIREBASE_CONFIG?.databaseURL,
+  projectId: window.FIREBASE_CONFIG?.projectId,
+  storageBucket: window.FIREBASE_CONFIG?.storageBucket,
+  messagingSenderId: window.FIREBASE_CONFIG?.messagingSenderId,
+  appId: window.FIREBASE_CONFIG?.appId,
+  measurementId: window.FIREBASE_CONFIG?.measurementId
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getDatabase(app);
+const database = getDatabase(app);
 
-const TEAM_BUDGETS_DB_PATH = '/team-budgets'; // stored at /team-budgets.json
-
+// Export functions for use in app.js
 export function initFirebase() {
-  return { app, auth, db };
+  return app;
 }
 
-export function signInEmailPassword(email, password) {
-  return signInWithEmailAndPassword(auth, email, password);
-}
-
-export function signInWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  return signInWithPopup(auth, provider);
+export function onAuthChange(callback) {
+  return onAuthStateChanged(auth, callback);
 }
 
 export function signOutUser() {
-  return firebaseSignOut(auth);
-}
-
-export function onAuthChange(cb) {
-  return onAuthStateChanged(auth, cb);
+  return signOut(auth);
 }
 
 export async function fetchTeamsFromFirebase() {
   try {
-    const snap = await get(ref(db, TEAM_BUDGETS_DB_PATH));
-    if (snap.exists()) {
-      return snap.val();
+    const teamsRef = ref(database, 'teams');
+    const snapshot = await get(teamsRef);
+    if (snapshot.exists()) {
+      return snapshot.val();
     }
     return null;
-  } catch (err) {
-    console.error('fetchTeamsFromFirebase error', err);
-    throw err;
+  } catch (error) {
+    console.error('Error fetching teams from Firebase:', error);
+    throw error;
   }
 }
 
-export async function saveTeamsToFirebase(data) {
+export async function saveTeamsToFirebase(teamsData) {
   try {
-    await set(ref(db, TEAM_BUDGETS_DB_PATH), data);
+    const teamsRef = ref(database, 'teams');
+    await set(teamsRef, teamsData);
     return true;
-  } catch (err) {
-    console.error('saveTeamsToFirebase error', err);
-    throw err;
+  } catch (error) {
+    console.error('Error saving teams to Firebase:', error);
+    throw error;
+  }
+}
+
+export async function signInEmailPassword(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error) {
+    console.error('Error signing in with email/password:', error);
+    throw error;
+  }
+}
+
+export async function signInWithGoogle() {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
+  } catch (error) {
+    console.error('Error signing in with Google:', error);
+    throw error;
   }
 }

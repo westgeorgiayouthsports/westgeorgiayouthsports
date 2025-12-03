@@ -64,6 +64,10 @@ node_modules/
 
 # dotenv environment variables file
 .env
+.env.local
+
+# Local development config (contains credentials)
+local-config.js
 
 # dataconnect generated files
 .dataconnect
@@ -71,4 +75,4 @@ node_modules/
 .continue
 wgys-ls-firebase-admin.json
 wgys-ls-firebase.json
-firebase.json
+GITHUB_SETUP.md

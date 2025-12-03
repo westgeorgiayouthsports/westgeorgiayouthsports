@@ -1,11 +1,8 @@
 {
-  "name": "west-georgia-youth-sports",
+  "name": "wgys-budget-app",
   "version": "1.0.0",
-  "description": "WGYS budget & cost web app - local dev server helper",
-  "main": "index.html",
-  "scripts": {
-    "start": "npx http-server -p 8000"
-  },
-  "author": "",
+  "description": "WGYS Budget and Pricing Template",
+  "keywords": ["firebase", "budget", "sports"],
+  "author": "WGYS",
   "license": "MIT"
 }

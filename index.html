@@ -14,7 +14,18 @@
   <meta name="theme-color" content="#208085">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
+  
+  <!-- Load configuration before app -->
+  <script src="config.js"></script>
+  <script>
+    // Try to load local config for development, ignore errors in production
+    try {
+      const script = document.createElement('script');
+      script.src = 'local-config.js';
+      script.onerror = () => {}; // Ignore 404 errors in production
+      document.head.appendChild(script);
+    } catch (e) {}
+  </script>
   <script type="module" src="app.js"></script>
   <style>
     :root {

@@ -193,6 +193,18 @@
     })();
   </script>
 
+  <!-- Load configuration before Firebase -->
+  <script src="config.js"></script>
+  <script>
+    // Try to load local config for development, ignore errors in production
+    try {
+      const script = document.createElement('script');
+      script.src = 'local-config.js';
+      script.onerror = () => {}; // Ignore 404 errors in production
+      document.head.appendChild(script);
+    } catch (e) {}
+  </script>
+  
   <script type="module">
     import { signInEmailPassword, signInWithGoogle, onAuthChange } from './firebase.js';
 
