@@ -2,9 +2,11 @@
 // This script loads Firebase configuration from GitHub Pages environment variables
 
 (function() {
-  // Check if we're in GitHub Pages environment
+  // Check if we're in GitHub Pages environment (including custom domains)
   const isGitHubPages = window.location.hostname.includes('github.io') || 
-                       window.location.hostname.includes('pages.dev');
+                       window.location.hostname.includes('pages.dev') ||
+                       window.location.hostname === 'app.westgeorgiayouthsports.org' ||
+                       window.location.hostname.includes('westgeorgiayouthsports');
   
   if (isGitHubPages) {
     // In production (GitHub Pages), these values will be replaced during build
