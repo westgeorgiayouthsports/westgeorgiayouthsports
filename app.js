@@ -202,6 +202,21 @@ let uniforms = [];
 let insurance = [];
 let training = [];
 let currentlyLoadedTeamId = null;
+let currentUser = null;
+
+function getCurrentUserEmail() {
+  return currentUser?.email || null;
+}
+
+function canEditTeam(team) {
+  if (!team.createdBy) return false; // Demo teams are read-only
+  return team.createdBy === getCurrentUserEmail() || isAdmin();
+}
+
+function isAdmin() {
+  const adminEmails = ['westga.youthsports@gmail.com']; // Add admin emails here
+  return adminEmails.includes(getCurrentUserEmail());
+}
 
 function getTodayDate() {
   const today = new Date();
@@ -226,13 +241,28 @@ async function initializeApp() {
       return;
     }
 
+    currentUser = user;
+
     // User is signed in — try to load team data from Firebase and persist locally.
     try {
       const fbData = await fetchTeamsFromFirebase();
       if (fbData && typeof fbData === 'object' && fbData.teams) {
-        TEAM_BUDGETS_DATA = fbData;
-        try { localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA)); } catch (err) { console.warn('Failed to write localStorage', err); }
-        console.info('Loaded team data from Firebase.');
+        // Convert Firebase teams object to array format
+        const teams = [];
+        Object.keys(fbData.teams).forEach(key => {
+          if (key !== 'coachId' && key !== 'updatedAt' && fbData.teams[key].id) {
+            teams.push(fbData.teams[key]);
+          }
+        });
+        
+        if (teams.length > 0) {
+          TEAM_BUDGETS_DATA = { teams };
+          try { localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA)); } catch (err) { console.warn('Failed to write localStorage', err); }
+          console.info('Loaded team data from Firebase.');
+          populateTeamLoader(); // Refresh dropdown after loading data
+        } else {
+          console.info('No valid teams found in Firebase; using local/default data.');
+        }
       } else {
         console.info('No team data found in Firebase; using local/default data.');
       }
@@ -344,19 +374,99 @@ async function initializeApp() {
   // Roster Change Listener
   document.getElementById('roster').addEventListener('change', updateAll);
 
-  // Team Name Change Listener - update the team data when name is edited
-  document.getElementById('teamName').addEventListener('change', function () {
-    if (currentlyLoadedTeamId) {
-      const team = TEAM_BUDGETS_DATA.teams.find(t => t.id === currentlyLoadedTeamId);
-      if (team) {
-        team.name = this.value;
-        localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
-        populateTeamLoader();
-        // Keep the team selected in the dropdown after updating the list
-        document.getElementById('teamLoader').value = currentlyLoadedTeamId;
+  // Edit Team Name Button Listener
+  document.getElementById('editTeamNameBtn').addEventListener('click', function () {
+    const teamNameField = document.getElementById('teamName');
+    const editBtn = this;
+
+    if (teamNameField.style.display === 'none') {
+      // Show input field
+      teamNameField.style.display = 'block';
+      teamNameField.focus();
+      teamNameField.select();
+      editBtn.textContent = '✓';
+      editBtn.title = 'Save team name';
+    } else {
+      // Save and hide input field
+      if (currentlyLoadedTeamId) {
+        const team = TEAM_BUDGETS_DATA.teams.find(t => t.id === currentlyLoadedTeamId);
+        if (team && canEditTeam(team)) {
+          team.name = teamNameField.value;
+          localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+          populateTeamLoader();
+          document.getElementById('teamLoader').value = currentlyLoadedTeamId;
+          saveTeamsToStore();
+        }
+      }
+      teamNameField.style.display = 'none';
+      editBtn.textContent = '✏️';
+      editBtn.title = 'Edit team name';
+    }
+  });
+
+  // Team Name Field - Save on Enter or Escape
+  document.getElementById('teamName').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      document.getElementById('editTeamNameBtn').click();
+    } else if (e.key === 'Escape') {
+      this.style.display = 'none';
+      const editBtn = document.getElementById('editTeamNameBtn');
+      editBtn.textContent = '✏️';
+      editBtn.title = 'Edit team name';
+      // Reset to original value
+      if (currentlyLoadedTeamId) {
+        const team = TEAM_BUDGETS_DATA.teams.find(t => t.id === currentlyLoadedTeamId);
+        if (team) this.value = team.name;
       }
     }
   });
+
+  // Edit Owner Button Listener
+  document.getElementById('editOwnerBtn').addEventListener('click', function () {
+    const ownerEditField = document.getElementById('teamOwnerEdit');
+    const editBtn = this;
+    
+    if (ownerEditField.style.display === 'none') {
+      // Show input field
+      ownerEditField.style.display = 'block';
+      ownerEditField.focus();
+      ownerEditField.select();
+      editBtn.textContent = '✓';
+      editBtn.title = 'Save owner email';
+    } else {
+      // Save and hide input field
+      if (currentlyLoadedTeamId) {
+        const team = TEAM_BUDGETS_DATA.teams.find(t => t.id === currentlyLoadedTeamId);
+        if (team) {
+          team.createdBy = ownerEditField.value || null;
+          document.getElementById('teamOwner').value = team.createdBy || 'Demo Team';
+          localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+        }
+      }
+      ownerEditField.style.display = 'none';
+      editBtn.textContent = '✏️';
+      editBtn.title = 'Edit owner email';
+    }
+  });
+
+  // Owner Edit Field - Save on Enter or Escape
+  document.getElementById('teamOwnerEdit').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      document.getElementById('editOwnerBtn').click();
+    } else if (e.key === 'Escape') {
+      this.style.display = 'none';
+      const editBtn = document.getElementById('editOwnerBtn');
+      editBtn.textContent = '✏️';
+      editBtn.title = 'Edit owner email';
+      // Reset to original value
+      if (currentlyLoadedTeamId) {
+        const team = TEAM_BUDGETS_DATA.teams.find(t => t.id === currentlyLoadedTeamId);
+        if (team) this.value = team.createdBy || '';
+      }
+    }
+  });
+
+
 
   // Load saved theme
   const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -396,7 +506,7 @@ function populateTeamLoader() {
   loaderSelect.innerHTML = '<option value="">-- Select a Team to Load --</option>';
 
   // Add teams from TEAM_BUDGETS_DATA
-  if (TEAM_BUDGETS_DATA && TEAM_BUDGETS_DATA.teams) {
+  if (TEAM_BUDGETS_DATA && TEAM_BUDGETS_DATA.teams && Array.isArray(TEAM_BUDGETS_DATA.teams)) {
     TEAM_BUDGETS_DATA.teams.forEach(team => {
       const option = document.createElement('option');
       option.value = team.id;
@@ -407,13 +517,15 @@ function populateTeamLoader() {
 }
 
 function saveCurrentTeam() {
-  // Get the team name to find the currently loaded team
-  const teamName = document.getElementById('teamName').value;
-  const currentTeam = TEAM_BUDGETS_DATA.teams.find(t => t.name === teamName);
+  // Use the currently loaded team ID to find the team
+  if (!currentlyLoadedTeamId) return;
+
+  const currentTeam = TEAM_BUDGETS_DATA.teams.find(t => t.id === currentlyLoadedTeamId);
 
   if (currentTeam) {
     // Save all current form data to the team object
-    currentTeam.name = document.getElementById('teamName').value;
+    const teamNameField = document.getElementById('teamName');
+    if (teamNameField) currentTeam.name = teamNameField.value;
     currentTeam.sport = document.getElementById('sport').value;
     currentTeam.season = parseInt(document.getElementById('season').value);
     currentTeam.rosterSize = parseInt(document.getElementById('roster').value);
@@ -432,11 +544,55 @@ function loadTeamData(teamId) {
   const team = TEAM_BUDGETS_DATA.teams.find(t => t.id === teamId);
   if (!team) return;
 
+  // Check if user can edit this team
+  const canEdit = canEditTeam(team);
+
+  // Show edit button and prepare team name field
+  const editBtn = document.getElementById('editTeamNameBtn');
+  const teamNameField = document.getElementById('teamName');
+  if (editBtn && teamNameField) {
+    editBtn.style.display = canEdit ? 'block' : 'none';
+    teamNameField.value = team.name || '';
+    teamNameField.style.display = 'none';
+  }
+
   // Load form fields
-  document.getElementById('teamName').value = team.name || '';
   document.getElementById('sport').value = team.sport || 'Baseball';
   document.getElementById('season').value = team.season || new Date().getFullYear();
   document.getElementById('roster').value = team.rosterSize || 12;
+
+  // Display team owner/manager
+  const ownerField = document.getElementById('teamOwner');
+  const editOwnerBtn = document.getElementById('editOwnerBtn');
+  const ownerEditField = document.getElementById('teamOwnerEdit');
+  
+  if (ownerField) {
+    ownerField.value = team.createdBy ? team.createdBy : 'Demo Team';
+  }
+  
+  // Show edit button only for admin users and reset state
+  if (editOwnerBtn) {
+    editOwnerBtn.style.display = isAdmin() ? 'block' : 'none';
+    editOwnerBtn.textContent = '✏️';
+    editOwnerBtn.title = 'Edit owner email';
+  }
+  
+  if (ownerEditField) {
+    ownerEditField.value = team.createdBy || '';
+    ownerEditField.style.display = 'none';
+  }
+
+  // Disable form fields for read-only teams
+  document.getElementById('sport').disabled = !canEdit;
+  document.getElementById('season').disabled = !canEdit;
+  document.getElementById('roster').disabled = !canEdit;
+
+  // Disable delete button for read-only teams
+  const deleteBtn = document.getElementById('deleteTeamBtn');
+  if (deleteBtn) {
+    deleteBtn.disabled = !canEdit;
+    deleteBtn.title = canEdit ? '' : 'You can only delete teams you created';
+  }
 
   // Load tournaments
   tournaments = JSON.parse(JSON.stringify(team.tournaments || []));
@@ -461,6 +617,18 @@ function loadTeamData(teamId) {
   // Update all calculations
   updateAll();
 
+  // Disable add/remove buttons for read-only teams
+  const buttons = document.querySelectorAll('.btn-primary, .btn-secondary');
+  buttons.forEach(btn => {
+    if (btn.textContent.includes('Add') || btn.textContent.includes('Clear') || btn.textContent.includes('Remove')) {
+      btn.disabled = !canEdit;
+    }
+  });
+
+  // Disable all input fields in tables for read-only teams
+  const inputs = document.querySelectorAll('#tournamentsBody input, #equipmentBody input, #uniformsBody input, #insuranceBody input, #trainingBody input');
+  inputs.forEach(input => input.disabled = !canEdit);
+
   // Keep the dropdown selected and track the currently loaded team
   currentlyLoadedTeamId = teamId;
 }
@@ -476,6 +644,11 @@ function deleteTeam() {
 
   const teamToDelete = TEAM_BUDGETS_DATA.teams.find(t => t.id === selectedTeamId);
   if (!teamToDelete) return;
+
+  if (!canEditTeam(teamToDelete)) {
+    alert('You can only delete teams that you created.');
+    return;
+  }
 
   if (confirm(`Are you sure you want to delete "${teamToDelete.name}"? This cannot be undone.`)) {
     // Remove the team from the array
@@ -667,7 +840,8 @@ function createNewTeam() {
     equipment: [],
     uniforms: [],
     insurance: [],
-    training: []
+    training: [],
+    createdBy: getCurrentUserEmail()
   };
   TEAM_BUDGETS_DATA.teams.push(newTeam);
 
@@ -683,8 +857,8 @@ function createNewTeam() {
     loaderSelect.value = teamId;
   }
 
-  // Render all sections
-  renderAll();
+  // Load the new team to display owner properly
+  loadTeamData(teamId);
 
   // Save to localStorage
   localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
