@@ -35,8 +35,8 @@ export function signOutUser() {
 
 export async function fetchTeamsFromFirebase() {
   try {
-    const teamsRef = ref(database, 'teams');
-    console.log('Fetching from Firebase path: teams');
+    const teamsRef = ref(database, 'team_budgets');
+    console.log('Fetching from Firebase path: team_budgets');
     const snapshot = await get(teamsRef);
     console.log('Firebase snapshot exists:', snapshot.exists());
     if (snapshot.exists()) {
@@ -44,7 +44,7 @@ export async function fetchTeamsFromFirebase() {
       console.log('Firebase data:', data);
       return data;
     }
-    console.log('No data found at Firebase path: teams');
+    console.log('No data found at Firebase path: team_budgets');
     return null;
   } catch (error) {
     console.error('Error fetching teams from Firebase:', error);
@@ -54,7 +54,7 @@ export async function fetchTeamsFromFirebase() {
 
 export async function saveTeamsToFirebase(teamsData) {
   try {
-    const teamsRef = ref(database, 'teams');
+    const teamsRef = ref(database, 'team_budgets');
     await set(teamsRef, teamsData);
     return true;
   } catch (error) {

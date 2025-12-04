@@ -246,23 +246,11 @@ async function initializeApp() {
     // User is signed in — try to load team data from Firebase and persist locally.
     try {
       const fbData = await fetchTeamsFromFirebase();
-      if (fbData && typeof fbData === 'object' && fbData.teams) {
-        // Convert Firebase teams object to array format
-        const teams = [];
-        Object.keys(fbData.teams).forEach(key => {
-          if (key !== 'coachId' && key !== 'updatedAt' && fbData.teams[key].id) {
-            teams.push(fbData.teams[key]);
-          }
-        });
-        
-        if (teams.length > 0) {
-          TEAM_BUDGETS_DATA = { teams };
-          try { localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA)); } catch (err) { console.warn('Failed to write localStorage', err); }
-          console.info('Loaded team data from Firebase.');
-          populateTeamLoader(); // Refresh dropdown after loading data
-        } else {
-          console.info('No valid teams found in Firebase; using local/default data.');
-        }
+      if (fbData && Array.isArray(fbData)) {
+        TEAM_BUDGETS_DATA = { teams: fbData };
+        try { localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA)); } catch (err) { console.warn('Failed to write localStorage', err); }
+        console.info('Loaded team data from Firebase.');
+        populateTeamLoader(); // Refresh dropdown after loading data
       } else {
         console.info('No team data found in Firebase; using local/default data.');
       }
@@ -737,7 +725,7 @@ async function saveTeamsToStore() {
 
   // Save to Firebase only
   try {
-    await saveTeamsToFirebase(TEAM_BUDGETS_DATA);
+    await saveTeamsToFirebase(TEAM_BUDGETS_DATA.teams);
     showToast('Team data saved locally and synced to Firebase server ✓', 'success', 4000);
   } catch (err) {
     console.warn('Failed to save to Firebase:', err);
