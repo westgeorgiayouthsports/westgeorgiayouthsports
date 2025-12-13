@@ -299,6 +299,37 @@
       border-bottom: none;
     }
 
+    /* Drag & drop handle styles */
+    .drag-cell {
+      width: 32px;
+      text-align: center;
+      cursor: default;
+      user-select: none;
+    }
+
+    .drag-handle {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      border-radius: 4px;
+      cursor: grab;
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    tr.dragging {
+      opacity: 0.6;
+    }
+
+    tr.drag-over {
+      outline: 2px dashed rgba(var(--color-teal-500-rgb), 0.35);
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -612,10 +643,13 @@
         <div class="form-group">
           <label for="teamOwner">Created By</label>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="teamOwner" readonly style="background-color: var(--color-secondary); cursor: not-allowed; flex: 1;">
-            <button type="button" id="editOwnerBtn" class="btn btn-secondary btn-sm" style="display: none; padding: 6px 8px; font-size: 12px;" title="Edit owner email">✏️</button>
+            <input type="text" id="teamOwner" readonly
+              style="background-color: var(--color-secondary); cursor: not-allowed; flex: 1;">
+            <button type="button" id="editOwnerBtn" class="btn btn-secondary btn-sm"
+              style="display: none; padding: 6px 8px; font-size: 12px;" title="Edit owner email">✏️</button>
           </div>
-          <input type="text" id="teamOwnerEdit" placeholder="Enter email address" style="display: none; margin-top: 6px;">
+          <input type="text" id="teamOwnerEdit" placeholder="Enter email address"
+            style="display: none; margin-top: 6px;">
         </div>
       </div>
     </section>
@@ -628,6 +662,7 @@
       <table>
         <thead>
           <tr>
+            <th></th>
             <th>No.</th>
             <th>Tournament Name</th>
             <th>Start Date</th>

@@ -413,7 +413,7 @@ async function initializeApp() {
   document.getElementById('editOwnerBtn').addEventListener('click', function () {
     const ownerEditField = document.getElementById('teamOwnerEdit');
     const editBtn = this;
-    
+
     if (ownerEditField.style.display === 'none') {
       // Show input field
       ownerEditField.style.display = 'block';
@@ -493,9 +493,10 @@ function populateTeamLoader() {
   // Clear existing options except the first placeholder
   loaderSelect.innerHTML = '<option value="">-- Select a Team to Load --</option>';
 
-  // Add teams from TEAM_BUDGETS_DATA
+  // Add teams from TEAM_BUDGETS_DATA, sorted alphabetically by name
   if (TEAM_BUDGETS_DATA && TEAM_BUDGETS_DATA.teams && Array.isArray(TEAM_BUDGETS_DATA.teams)) {
-    TEAM_BUDGETS_DATA.teams.forEach(team => {
+    const teams = [...TEAM_BUDGETS_DATA.teams].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    teams.forEach(team => {
       const option = document.createElement('option');
       option.value = team.id;
       option.textContent = `${team.name} (${team.sport}, ${team.season})`;
@@ -553,18 +554,18 @@ function loadTeamData(teamId) {
   const ownerField = document.getElementById('teamOwner');
   const editOwnerBtn = document.getElementById('editOwnerBtn');
   const ownerEditField = document.getElementById('teamOwnerEdit');
-  
+
   if (ownerField) {
     ownerField.value = team.createdBy ? team.createdBy : 'Demo Team';
   }
-  
+
   // Show edit button only for admin users and reset state
   if (editOwnerBtn) {
     editOwnerBtn.style.display = isAdmin() ? 'block' : 'none';
     editOwnerBtn.textContent = '✏️';
     editOwnerBtn.title = 'Edit owner email';
   }
-  
+
   if (ownerEditField) {
     ownerEditField.value = team.createdBy || '';
     ownerEditField.style.display = 'none';
@@ -869,8 +870,20 @@ function setupEventDelegation() {
       }
       if (e.target.classList.contains('tournament-start')) {
         tournaments[idx].start = e.target.value;
-        if (!tournaments[idx].end && tournaments[idx].start) {
-          tournaments[idx].end = tournaments[idx].start;
+        // Only default end to start if end is empty or earlier than start
+        if (tournaments[idx].start) {
+          const startDate = new Date(tournaments[idx].start);
+          let endDate = tournaments[idx].end ? new Date(tournaments[idx].end) : null;
+          if (!endDate || endDate < startDate) {
+            // add 1 day to start date
+            const newEndDate = new Date(startDate);
+            newEndDate.setDate(newEndDate.getDate() + 1); // +1 day [web:6][web:8]
+            // format back to yyyy-mm-dd (for date input)
+            const iso = newEndDate.toISOString().slice(0, 10);
+            tournaments[idx].end = iso;
+            const endInput = row.querySelector('.tournament-end');
+            if (endInput) endInput.value = tournaments[idx].end;
+          }
         }
       }
       if (e.target.classList.contains('tournament-end')) {
@@ -888,6 +901,11 @@ function setupEventDelegation() {
         }
       }
 
+      // If the start or end date changed, re-render (which will sort by start date)
+      if (e.target.classList.contains('tournament-start') || e.target.classList.contains('tournament-end')) {
+        renderTournaments();
+      }
+
       // Save immediately
       saveCurrentTeam();
       localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
@@ -895,6 +913,30 @@ function setupEventDelegation() {
     });
 
     tournamentsBody.addEventListener('blur', (e) => {
+      // When start date loses focus, default end date to start if empty or before start
+      if (e.target.classList && e.target.classList.contains('tournament-start')) {
+        const row = e.target.closest('tr');
+        if (row) {
+          const idx = parseInt(row.dataset.index);
+          if (tournaments[idx] && tournaments[idx].start) {
+            const startDate = new Date(tournaments[idx].start);
+            const endDate = tournaments[idx].end ? new Date(tournaments[idx].end) : null;
+            if (!endDate || endDate < startDate) {
+              // add 1 day to start date
+              const newEndDate = new Date(startDate);
+              newEndDate.setDate(newEndDate.getDate() + 1); // +1 day [web:6][web:8]
+              // format back to yyyy-mm-dd (for date input)
+              const iso = newEndDate.toISOString().slice(0, 10);
+              tournaments[idx].end = iso;
+              const endInput = row.querySelector('.tournament-end');
+              if (endInput) endInput.value = tournaments[idx].end;
+              saveCurrentTeam();
+              localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA));
+              updateAll();
+            }
+          }
+        }
+      }
       if (e.target.classList.contains('fee-input')) {
         const feeDisplay = e.target.previousElementSibling;
         if (feeDisplay && feeDisplay.classList.contains('fee-display')) {
@@ -933,6 +975,57 @@ function setupEventDelegation() {
         const idx = parseInt(e.target.dataset.index);
         removeTournament(idx);
       }
+    });
+
+    // Drag & drop handlers for manual ordering
+    tournamentsBody.addEventListener('dragstart', (e) => {
+      const handle = e.target.closest('.drag-handle');
+      if (!handle) return;
+      const srcIdx = parseInt(handle.dataset.index);
+      e.dataTransfer.setData('text/plain', String(srcIdx));
+      e.dataTransfer.effectAllowed = 'move';
+      const row = handle.closest('tr');
+      if (row) row.classList.add('dragging');
+    });
+
+    tournamentsBody.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const row = e.target.closest('tr');
+      if (!row) return;
+      // mark potential drop target
+      if (!row.classList.contains('dragging')) row.classList.add('drag-over');
+    });
+
+    tournamentsBody.addEventListener('dragleave', (e) => {
+      const row = e.target.closest('tr');
+      if (row) row.classList.remove('drag-over');
+    });
+
+    tournamentsBody.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const src = e.dataTransfer.getData('text/plain');
+      if (!src) return;
+      const srcIdx = parseInt(src);
+      const targetRow = e.target.closest('tr');
+      const targetIdx = targetRow ? parseInt(targetRow.dataset.index) : tournaments.length - 1;
+      if (isNaN(srcIdx) || isNaN(targetIdx)) return;
+      // Reorder array
+      const moved = tournaments.splice(srcIdx, 1)[0];
+      tournaments.splice(targetIdx, 0, moved);
+
+      // Persist and re-render without sorting (preserve manual order)
+      saveCurrentTeam();
+      try { localStorage.setItem('TEAM_BUDGETS_DATA', JSON.stringify(TEAM_BUDGETS_DATA)); } catch (err) { /* ignore */ }
+      renderTournaments(false);
+      updateAll();
+    });
+
+    tournamentsBody.addEventListener('dragend', (e) => {
+      const handle = e.target.closest('.drag-handle');
+      const row = handle ? handle.closest('tr') : e.target.closest('tr');
+      if (row) row.classList.remove('dragging');
+      const rows = tournamentsBody.querySelectorAll('tr');
+      rows.forEach(r => r.classList.remove('drag-over'));
     });
   }
 
@@ -1214,10 +1307,13 @@ function setupEventDelegation() {
   }
 }
 
-function renderTournaments() {
+function renderTournaments(shouldSort = true) {
+  // Optionally sort tournaments by start date before rendering (set shouldSort=false to preserve manual order)
+  if (shouldSort) sortTournaments();
   const body = document.getElementById('tournamentsBody');
   body.innerHTML = tournaments.map((t, i) => `
         <tr data-index="${i}">
+            <td class="drag-cell"><span class="drag-handle" draggable="true" data-index="${i}">☰</span></td>
             <td>${i + 1}.</td>
             <td><input type="text" class="tournament-name" value="${t.name}"></td>
             <td><input type="date" class="tournament-start" value="${t.start}"></td>
@@ -1230,6 +1326,15 @@ function renderTournaments() {
         </tr>
     `).join('');
   updateAll();
+}
+
+function sortTournaments() {
+  if (!Array.isArray(tournaments)) return;
+  tournaments.sort((a, b) => {
+    const aDate = a && a.start ? new Date(a.start) : new Date('9999-12-31');
+    const bDate = b && b.start ? new Date(b.start) : new Date('9999-12-31');
+    return aDate - bDate;
+  });
 }
 
 function renderEquipment() {
@@ -1352,8 +1457,29 @@ function renderAll() {
 
 // Tournament Functions
 function addTournament() {
+  // Default start to 7 days after previous tournament start if present, otherwise today
   const todayDate = getTodayDate();
-  tournaments.push({ name: "", start: todayDate, end: todayDate, fee: 0 });
+  let newStart = todayDate;
+  if (tournaments.length > 0) {
+    const last = tournaments[tournaments.length - 1];
+    const lastStart = last && last.start ? new Date(last.start) : null;
+    if (lastStart) {
+      const d = new Date(lastStart);
+      d.setDate(d.getDate() + 7);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      newStart = `${yyyy}-${mm}-${dd}`;
+    }
+  }
+  // Default end to one day after newStart
+  const startDate = new Date(newStart);
+  // add 1 day to start date
+  const newEndDate = new Date(startDate);
+  newEndDate.setDate(newEndDate.getDate() + 1); // +1 day [web:6][web:8]
+  // format back to yyyy-mm-dd (for date input)
+  const iso = newEndDate.toISOString().slice(0, 10);
+  tournaments.push({ name: "", start: newStart, end: iso, fee: 0 });
   renderTournaments();
 }
 
